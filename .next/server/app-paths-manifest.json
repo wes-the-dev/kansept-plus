@@ -1,9 +1,0 @@
-{
-  "/page": "app/page.js",
-  "/projects/page": "app/projects/page.js",
-  "/projects/[id]/page": "app/projects/[id]/page.js",
-  "/contact/page": "app/contact/page.js",
-  "/insights/[id]/page": "app/insights/[id]/page.js",
-  "/services/page": "app/services/page.js",
-  "/who-we-are/page": "app/who-we-are/page.js"
-}
