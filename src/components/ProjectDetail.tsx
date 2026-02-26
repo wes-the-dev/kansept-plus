@@ -5,51 +5,71 @@ import { TransitionLink } from "./TransitionLink";
 import { motion } from "motion/react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
-const projectData = {
-  id: "project-a",
-  title: "Atherton Residence",
-  category: "Private Residential",
-  description: [
-    "A young entrepreneurial couple with two children approached the design team with a vision: a dramatic transformation of a traditional English-style house and gardens into a contemporary and elegant compound that embraces natural light while seamlessly connecting the interior to the outdoor landscaping.",
-    "The result is a harmonious blend of classic architecture and modern living, where every room tells a story of sophistication and comfort.",
-  ],
-  details: [
-    { label: "Location", value: "Atherton, California" },
-    { label: "Architect", value: "Feldman Architecture" },
-    { label: "Landscape Architect", value: "Ground Studio Landscape Architecture" },
-    { label: "Builder", value: "Plath & CO General Contractors" },
-    { label: "Photographer", value: "Matthew Millman" },
-    { label: "Lighting Consultant", value: "Anna Kondolf Lighting Design" },
-    { label: "Press", value: "Elle Decor, California Homes, Home Journal" },
-    { label: "Team Members", value: "Michael Booth, Lauren McGuier" },
-  ],
-  heroImage: "/images/project-detail-hero.jpg",
-  gallery: [
-    { type: "full", src: "/images/project-gallery-1.jpg" },
-    {
-      type: "split",
-      images: [
-        "/images/project-gallery-2.jpg",
-        "/images/project-gallery-3.jpg",
-      ],
-    },
-    { type: "full", src: "/images/project-gallery-4.jpg" },
-    {
-      type: "split",
-      images: [
-        "/images/project-gallery-5.jpg",
-        "/images/project-detail-hero.jpg",
-      ],
-    },
-    { type: "full", src: "/images/project-gallery-1.jpg" },
-  ],
+const projectsList: Record<string, { title: string; category: string; image: string }> = {
+  "1": { title: "Project A", category: "Hotel & Beverage, Hotels", image: "/images/project-a.jpg" },
+  "2": { title: "Project B", category: "Hotels", image: "/images/project-b.jpg" },
+  "3": { title: "Project C", category: "Hotels", image: "/images/project-c.jpg" },
+  "4": { title: "Project D", category: "Private Residential", image: "/images/project-d.jpg" },
+  "5": { title: "Project E", category: "Private Residential", image: "/images/project-e.jpg" },
+  "6": { title: "Project F", category: "Private Residential", image: "/images/project-f.jpg" },
+};
+
+const getProjectData = (id: string) => {
+  const baseData = projectsList[id] || {
+    title: `Project ${id.toUpperCase()}`,
+    category: "Architecture & Design",
+    image: "/images/project-detail-hero.jpg"
+  };
+
+  return {
+    id,
+    title: baseData.title,
+    category: baseData.category,
+    description: [
+      "A young entrepreneurial couple with two children approached the design team with a vision: a dramatic transformation of a traditional English-style house and gardens into a contemporary and elegant compound that embraces natural light while seamlessly connecting the interior to the outdoor landscaping.",
+      "The result is a harmonious blend of classic architecture and modern living, where every room tells a story of sophistication and comfort.",
+    ],
+    details: [
+      { label: "Location", value: "Location Placeholder" },
+      { label: "Architect", value: "Name Placeholder" },
+      { label: "Landscape Architect", value: "Name Placeholder" },
+      { label: "Builder", value: "Name Placeholder" },
+      { label: "Photographer", value: "Name Placeholder" },
+      { label: "Lighting Consultant", value: "Name Placeholder" },
+      { label: "Press", value: "Publication Placeholder" },
+      { label: "Team Members", value: "Name Placeholder, Name Placeholder" },
+    ],
+    heroImage: baseData.image,
+    gallery: [
+      { type: "full", src: "/images/project-gallery-1.jpg" },
+      {
+        type: "split",
+        images: [
+          "/images/project-gallery-2.jpg",
+          "/images/project-gallery-3.jpg",
+        ],
+      },
+      { type: "full", src: "/images/project-gallery-4.jpg" },
+      {
+        type: "split",
+        images: [
+          "/images/project-gallery-5.jpg",
+          "/images/project-detail-hero.jpg",
+        ],
+      },
+      { type: "full", src: "/images/project-gallery-1.jpg" },
+    ],
+  };
 };
 
 interface ProjectDetailProps {
   id: string;
 }
 
+
 export const ProjectDetail = ({ id }: ProjectDetailProps) => {
+  const projectData = getProjectData(id);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -93,17 +113,17 @@ export const ProjectDetail = ({ id }: ProjectDetailProps) => {
             />
           </motion.div>
         </motion.div>
-      </section>
+      </section >
 
       {/* DESCRIPTION SECTION */}
-      <section className="px-6 md:px-[60px] py-20 md:py-32 max-w-[1800px] mx-auto">
+      < section className="px-6 md:px-[60px] py-20 md:py-32 max-w-[1800px] mx-auto" >
         {/* Back Button */}
-        <div className="mb-12">
+        < div className="mb-12" >
           <TransitionLink href="/projects" className="text-[#1a3749] hover:text-[#1a3749]/60 transition-colors inline-flex items-center gap-2 group">
             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
             <span className="text-[11px] uppercase tracking-[2px]">Back to Projects</span>
           </TransitionLink>
-        </div>
+        </div >
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -139,10 +159,10 @@ export const ProjectDetail = ({ id }: ProjectDetailProps) => {
             </div>
           </div>
         </motion.div>
-      </section>
+      </section >
 
       {/* GALLERY SECTION */}
-      <section className="w-full pb-32">
+      < section className="w-full pb-32" >
         <div className="flex flex-col gap-1 md:gap-1">
           {projectData.gallery.map((item, idx) => (
             <React.Fragment key={idx}>
@@ -183,10 +203,10 @@ export const ProjectDetail = ({ id }: ProjectDetailProps) => {
             </React.Fragment>
           ))}
         </div>
-      </section>
+      </section >
 
       {/* NEXT PROJECT NAVIGATION */}
-      <section className="px-6 md:px-[60px] pb-20 pt-10 border-t border-[#1a3749]/10 mx-6 md:mx-[60px]">
+      < section className="px-6 md:px-[60px] pb-20 pt-10 border-t border-[#1a3749]/10 mx-6 md:mx-[60px]" >
         <div className="flex justify-between items-center">
           <TransitionLink href="/projects" className="text-[11px] uppercase tracking-[2px] text-[#1a3749]/50 hover:text-[#1a3749] transition-colors">
             All Projects
@@ -195,8 +215,8 @@ export const ProjectDetail = ({ id }: ProjectDetailProps) => {
             Next Project <ArrowRight size={16} />
           </TransitionLink>
         </div>
-      </section>
+      </section >
 
-    </div>
+    </div >
   );
 };
