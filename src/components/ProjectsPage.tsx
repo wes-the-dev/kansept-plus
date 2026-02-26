@@ -11,7 +11,7 @@ export const ProjectsPage = () => {
   }, []);
 
   return (
-    <div className="bg-[#FFF3EB] min-h-screen text-[#1a3749]">
+    <div className="bg-[#FFF3EB] min-h-[100vh] text-[#1a3749]">
       <Header />
 
       <main>

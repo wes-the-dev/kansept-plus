@@ -55,7 +55,7 @@ export const Projects = () => {
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-black/20" />
-        <div className="absolute bottom-20 left-6 md:left-[60px]">
+        <div className="absolute bottom-40 md:bottom-20 left-6 md:left-[60px] pr-6 md:pr-0">
           <h1 className="text-white text-5xl md:text-7xl">Our Projects</h1>
         </div>
 
