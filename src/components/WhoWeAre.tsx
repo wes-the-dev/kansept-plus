@@ -8,7 +8,7 @@ const step1Image = "/images/project-d.jpg";
 const step2Image = "/images/step2.jpg";
 const step3Image = "/images/step3.jpg";
 const step4Image = "/images/step4.jpg";
-const step5Image = "/images/step5.jpg";
+const step5Image = "/images/execution_styling_sharp.jpg";
 
 const contactImg1 = "/images/contact1.jpg";
 const contactImg2 = "/images/contact2.jpg";
