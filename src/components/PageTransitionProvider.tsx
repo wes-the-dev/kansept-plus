@@ -21,20 +21,8 @@ const TransitionContext = createContext<TransitionContextType>({
 
 export const usePageTransition = () => useContext(TransitionContext);
 
-const ENTER_DURATION = 0.38;
-const EXIT_EASE: [number, number, number, number] = [0.76, 0, 0.24, 1];
-
-// Shared entrance props for both halves —
-// both start as a thin line at the screen centre, stretch left-to-right,
-// then each half expands toward its own edge.
-const halfEnter = {
-  initial: { scaleX: 0, scaleY: 0.004 },
-  animate: { scaleX: 1, scaleY: 1 },
-  transition: {
-    scaleX: { duration: ENTER_DURATION, ease: [0.76, 0, 0.24, 1] as const },
-    scaleY: { duration: ENTER_DURATION, delay: ENTER_DURATION, ease: [0.76, 0, 0.24, 1] as const },
-  },
-};
+const TRANSITION_DURATION = 0.5;
+const EASE: [number, number, number, number] = [0.76, 0, 0.24, 1];
 
 export const PageTransitionProvider = ({
   children,
@@ -44,6 +32,7 @@ export const PageTransitionProvider = ({
   const router = useRouter();
   const pathname = usePathname();
   const [show, setShow] = useState(false);
+
   const pendingHref = useRef<string | null>(null);
   const navigated = useRef(false);
 
@@ -63,25 +52,27 @@ export const PageTransitionProvider = ({
 
       pendingHref.current = href;
       navigated.current = false;
-      setShow(true);
+      setShow(true); // Close curtain
     },
     [show, pathname]
   );
 
-  // When the new page has loaded (pathname changed), start the reveal
+  // When the new page has loaded (pathname changed), open the curtain
   useEffect(() => {
     if (navigated.current) {
-      const timer = setTimeout(() => setShow(false), 60);
+      const timer = setTimeout(() => {
+        setShow(false);
+        pendingHref.current = null;
+      }, 60);
       return () => clearTimeout(timer);
     }
   }, [pathname]);
 
-  // Called when the entrance finishes — screen is fully covered, safe to route
+  // Called when the entrance finishes — screen is fully covered, safe to switch pages underneath
   const handleEntranceComplete = () => {
     if (!navigated.current && pendingHref.current) {
       navigated.current = true;
       router.push(pendingHref.current);
-      pendingHref.current = null;
     }
   };
 
@@ -92,35 +83,54 @@ export const PageTransitionProvider = ({
       <AnimatePresence>
         {show && (
           <>
-            {/* Top half — entrance grows upward from centre;
-                exit slides UP, the growing gap reveals the new page */}
+            {/* Top half — entrance slides down from top to centre;
+                exit slides UP, revealing the new page */}
             <motion.div
               key="curtain-top"
-              className="fixed top-0 left-0 right-0 bg-[#FFF3EB] z-200"
-              style={{ height: "50vh", transformOrigin: "bottom center" }}
-              {...halfEnter}
+              className="fixed top-0 left-0 right-0 bg-[#FFF3EB] z-[200]"
+              style={{ height: "50vh" }}
+              initial={{ y: "-100%" }}
+              animate={{ y: "0%" }}
+              transition={{ duration: TRANSITION_DURATION, ease: EASE }}
               exit={{
                 y: "-100%",
-                transition: { duration: 0.22, ease: EXIT_EASE },
+                transition: { duration: TRANSITION_DURATION, ease: EASE },
               }}
               onAnimationComplete={handleEntranceComplete}
             />
 
-            {/* Bottom half — entrance grows downward from centre;
-                exit slides DOWN, widening the same gap */}
+            {/* Bottom half — entrance slides up from bottom to centre;
+                exit slides DOWN, revealing the new page */}
             <motion.div
               key="curtain-bottom"
-              className="fixed bottom-0 left-0 right-0 bg-[#FFF3EB] z-200"
-              style={{ height: "50vh", transformOrigin: "top center" }}
-              {...halfEnter}
+              className="fixed bottom-0 left-0 right-0 bg-[#FFF3EB] z-[200]"
+              style={{ height: "50vh" }}
+              initial={{ y: "100%" }}
+              animate={{ y: "0%" }}
+              transition={{ duration: TRANSITION_DURATION, ease: EASE }}
               exit={{
                 y: "100%",
-                transition: { duration: 0.22, ease: EXIT_EASE },
+                transition: { duration: TRANSITION_DURATION, ease: EASE },
               }}
             />
+
+            {/* Subtle Loading indicator to ease the "blank screen" feeling if page load takes too long */}
+            <motion.div
+              key="curtain-loader"
+              className="fixed inset-0 z-[201] flex items-center justify-center pointer-events-none"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8, duration: 0.5 }}
+              exit={{ opacity: 0, transition: { duration: 0.2 } }}
+            >
+              <span className="text-[11px] font-medium uppercase tracking-[3px] text-[#b5754d] animate-pulse">
+                Kansept Plus
+              </span>
+            </motion.div>
           </>
         )}
       </AnimatePresence>
     </TransitionContext.Provider>
   );
 };
+
