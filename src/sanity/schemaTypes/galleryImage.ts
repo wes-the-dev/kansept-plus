@@ -2,27 +2,51 @@ import { defineField, defineType } from "sanity";
 
 export const galleryImage = defineType({
   name: "galleryImage",
-  title: "Gallery Images",
+  title: "Gallery Images / Videos",
   type: "document",
   fields: [
+    defineField({
+      name: "mediaType",
+      title: "Media Type",
+      type: "string",
+      options: {
+        list: [
+          { title: "Image", value: "image" },
+          { title: "Video", value: "video" },
+        ],
+        layout: "radio",
+      },
+      initialValue: "image",
+      description: "Choose whether this gallery item is a photo or a video.",
+      validation: (Rule) => Rule.required(),
+    }),
     defineField({
       name: "image",
       title: "Image",
       type: "image",
       options: { hotspot: true },
-      validation: (Rule) => Rule.required(),
+      description: "Upload the photo for this gallery item. Only required when Media Type is set to Image.",
+    }),
+    defineField({
+      name: "video",
+      title: "Video File",
+      type: "file",
+      options: {
+        accept: "video/mp4,video/webm,video/quicktime,video/ogg",
+      },
+      description: "Upload a video file (MP4, WebM, or MOV). Only required when Media Type is set to Video.",
     }),
     defineField({
       name: "alt",
-      title: "Alt Text",
+      title: "Alt Text / Caption",
       type: "string",
-      description: "Describe the image for accessibility.",
+      description: "Briefly describe the content of this image or video (e.g. 'Living room with custom joinery'). Used for accessibility and hover captions.",
     }),
     defineField({
       name: "order",
       title: "Display Order",
       type: "number",
-      description: "Lower numbers appear first in the gallery carousel.",
+      description: "Controls the position of this item in the gallery. Lower numbers appear first. Leave blank to append at the end.",
     }),
   ],
   orderings: [
@@ -33,9 +57,12 @@ export const galleryImage = defineType({
     },
   ],
   preview: {
-    select: { title: "alt", media: "image" },
-    prepare({ title, media }) {
-      return { title: title || "Gallery Image", media };
+    select: { title: "alt", media: "image", mediaType: "mediaType" },
+    prepare({ title, media, mediaType }) {
+      return {
+        title: title || (mediaType === "video" ? "Video Item" : "Gallery Image"),
+        media,
+      };
     },
   },
 });

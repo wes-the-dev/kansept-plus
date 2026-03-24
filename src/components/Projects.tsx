@@ -4,7 +4,7 @@ import React from "react";
 import { TransitionLink } from "./TransitionLink";
 import { motion } from "motion/react";
 import type { SanityProject, SanitySettings } from "@/sanity/lib/queries";
-import { resolveImageUrl } from "@/sanity/lib/imageUrl";
+import { resolveMediaAsset } from "@/sanity/lib/imageUrl";
 
 const FALLBACK_PROJECTS = [
   { id: "1", title: "Project A", category: "Hotel & Beverage, Hotels", image: "/images/project-a.jpg" },
@@ -23,16 +23,22 @@ interface ProjectsProps {
 export const Projects = ({ sanityProjects, settings }: ProjectsProps) => {
   const projects =
     sanityProjects && sanityProjects.length > 0
-      ? sanityProjects.map((p) => ({
-          id: p.slug.current,
-          title: p.title,
-          category: p.category,
-          image: resolveImageUrl(p.mainImage, 800) || "/images/project-a.jpg",
-        }))
-      : FALLBACK_PROJECTS;
+      ? sanityProjects.map((p) => {
+          const media = resolveMediaAsset(p.mainImage, 800);
+          return {
+            id: p.slug.current,
+            title: p.title,
+            category: p.category,
+            url: media?.url ?? "/images/project-a.jpg",
+            isVideo: media?.isVideo ?? false,
+          };
+        })
+      : FALLBACK_PROJECTS.map((p) => ({ ...p, url: p.image, isVideo: false }));
 
-  const heroImage =
-    resolveImageUrl(settings?.projectsPage?.heroImage) || "/images/hero-projects.png";
+  const heroMedia = resolveMediaAsset(settings?.projectsPage?.heroImage);
+  const heroUrl = heroMedia?.url ?? "/images/hero-projects.png";
+  const heroIsVideo = heroMedia?.isVideo ?? false;
+
   const introHeadline =
     settings?.projectsPage?.introHeadline ||
     "Immersive spaces that stir senses, invite exploration, and spark emotion.";
@@ -45,17 +51,16 @@ export const Projects = ({ sanityProjects, settings }: ProjectsProps) => {
 
       {/* HERO SECTION */}
       <section className="relative h-screen w-full mb-20 md:mb-32">
-        <img
-          src={heroImage}
-          alt="Kansept Project Hero"
-          className="w-full h-full object-cover"
-        />
+        {heroIsVideo ? (
+          <video src={heroUrl} autoPlay muted loop playsInline className="w-full h-full object-cover" />
+        ) : (
+          <img src={heroUrl} alt="Kansept Project Hero" className="w-full h-full object-cover" />
+        )}
         <div className="absolute inset-0 bg-black/20" />
         <div className="absolute bottom-40 md:bottom-20 left-6 md:left-[60px] pr-6 md:pr-0">
           <h1 className="text-white text-5xl md:text-7xl">Our Projects</h1>
         </div>
 
-        {/* Scroll Indicator */}
         <motion.div
           className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white flex flex-col items-center gap-2 opacity-80"
           initial={{ opacity: 0, y: -10 }}
@@ -86,12 +91,8 @@ export const Projects = ({ sanityProjects, settings }: ProjectsProps) => {
           transition={{ duration: 0.8 }}
           className="max-w-4xl"
         >
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-normal leading-tight mb-8">
-            {introHeadline}
-          </h2>
-          <p className="text-[15px] md:text-[16px] font-normal leading-relaxed text-[#1a3749]/70 max-w-3xl">
-            {introBody}
-          </p>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-normal leading-tight mb-8">{introHeadline}</h2>
+          <p className="text-[15px] md:text-[16px] font-normal leading-relaxed text-[#1a3749]/70 max-w-3xl">{introBody}</p>
         </motion.div>
       </section>
 
@@ -108,18 +109,26 @@ export const Projects = ({ sanityProjects, settings }: ProjectsProps) => {
                 className="group cursor-pointer flex flex-col"
               >
                 <div className="overflow-hidden aspect-[4/5] w-full relative">
-                  <img
-                    src={project.image}
-                    alt={project.title}
-                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-                  />
+                  {project.isVideo ? (
+                    <video
+                      src={project.url}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                    />
+                  ) : (
+                    <img
+                      src={project.url}
+                      alt={project.title}
+                      className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                    />
+                  )}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500" />
                 </div>
-
                 <div className="pt-6 text-center">
-                  <h3 className="text-[13px] uppercase tracking-[2px] font-medium text-[#1a3749]">
-                    {project.title}
-                  </h3>
+                  <h3 className="text-[13px] uppercase tracking-[2px] font-medium text-[#1a3749]">{project.title}</h3>
                   <p className="text-[10px] uppercase tracking-[1.5px] text-[#1a3749]/60 mt-1">{project.category}</p>
                 </div>
               </motion.div>

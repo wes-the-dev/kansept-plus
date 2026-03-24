@@ -5,7 +5,7 @@ import { TransitionLink } from "./TransitionLink";
 import { motion } from "motion/react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import type { SanityProject } from "@/sanity/lib/queries";
-import { resolveImageUrl } from "@/sanity/lib/imageUrl";
+import { resolveMediaAsset } from "@/sanity/lib/imageUrl";
 
 const FALLBACK_PROJECTS: Record<string, { title: string; category: string; image: string }> = {
   "1": { title: "Project A", category: "Hotel & Beverage, Hotels", image: "/images/project-a.jpg" },
@@ -17,11 +17,11 @@ const FALLBACK_PROJECTS: Record<string, { title: string; category: string; image
 };
 
 const FALLBACK_GALLERY = [
-  { type: "full" as const, src: "/images/project-gallery-1.jpg", images: undefined as string[] | undefined },
-  { type: "split" as const, src: undefined as string | undefined, images: ["/images/project-gallery-2.jpg", "/images/project-gallery-3.jpg"] },
-  { type: "full" as const, src: "/images/project-gallery-4.jpg", images: undefined as string[] | undefined },
-  { type: "split" as const, src: undefined as string | undefined, images: ["/images/project-gallery-5.jpg", "/images/project-detail-hero.jpg"] },
-  { type: "full" as const, src: "/images/project-gallery-1.jpg", images: undefined as string[] | undefined },
+  { type: "full" as const, items: [{ url: "/images/project-gallery-1.jpg", isVideo: false }] },
+  { type: "split" as const, items: [{ url: "/images/project-gallery-2.jpg", isVideo: false }, { url: "/images/project-gallery-3.jpg", isVideo: false }] },
+  { type: "full" as const, items: [{ url: "/images/project-gallery-4.jpg", isVideo: false }] },
+  { type: "split" as const, items: [{ url: "/images/project-gallery-5.jpg", isVideo: false }, { url: "/images/project-detail-hero.jpg", isVideo: false }] },
+  { type: "full" as const, items: [{ url: "/images/project-gallery-1.jpg", isVideo: false }] },
 ];
 
 const FALLBACK_DETAILS = [
@@ -45,7 +45,6 @@ interface ProjectDetailProps {
   sanityProject?: SanityProject | null;
 }
 
-
 export const ProjectDetail = ({ id, sanityProject }: ProjectDetailProps) => {
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -59,9 +58,11 @@ export const ProjectDetail = ({ id, sanityProject }: ProjectDetailProps) => {
 
   const title = sanityProject?.title || fallback.title;
   const category = sanityProject?.category || fallback.category;
-  const heroImage = sanityProject?.mainImage
-    ? resolveImageUrl(sanityProject.mainImage, 1600) || fallback.image
-    : fallback.image;
+
+  const heroMedia = resolveMediaAsset(sanityProject?.mainImage, 1600);
+  const heroUrl = heroMedia?.url ?? fallback.image;
+  const heroIsVideo = heroMedia?.isVideo ?? false;
+
   const description =
     sanityProject?.description && sanityProject.description.length > 0
       ? sanityProject.description
@@ -75,14 +76,10 @@ export const ProjectDetail = ({ id, sanityProject }: ProjectDetailProps) => {
     sanityProject?.gallery && sanityProject.gallery.length > 0
       ? sanityProject.gallery.map((section) => ({
           type: section.layout,
-          src:
-            section.layout === "full" && section.images[0]
-              ? resolveImageUrl(section.images[0]) || ""
-              : undefined,
-          images:
-            section.layout === "split"
-              ? section.images.map((img) => resolveImageUrl(img) || "").filter(Boolean)
-              : undefined,
+          items: section.images.map((m) => {
+            const resolved = resolveMediaAsset(m);
+            return { url: resolved?.url ?? "", isVideo: resolved?.isVideo ?? false };
+          }),
         }))
       : FALLBACK_GALLERY;
 
@@ -97,7 +94,11 @@ export const ProjectDetail = ({ id, sanityProject }: ProjectDetailProps) => {
           transition={{ duration: 1 }}
           className="w-full h-full"
         >
-          <img src={heroImage} alt={title} className="w-full h-full object-cover" />
+          {heroIsVideo ? (
+            <video src={heroUrl} autoPlay muted loop playsInline className="w-full h-full object-cover" />
+          ) : (
+            <img src={heroUrl} alt={title} className="w-full h-full object-cover" />
+          )}
           <div className="absolute inset-0 bg-black/10" />
         </motion.div>
 
@@ -111,7 +112,7 @@ export const ProjectDetail = ({ id, sanityProject }: ProjectDetailProps) => {
           <motion.div
             animate={{ y: [0, 8, 0] }}
             transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-            className="w-[1px] h-12 bg-white/50 relative overflow-hidden"
+            className="w-px h-12 bg-white/50 relative overflow-hidden"
           >
             <motion.div
               className="absolute top-0 left-0 w-full h-1/2 bg-white"
@@ -174,15 +175,15 @@ export const ProjectDetail = ({ id, sanityProject }: ProjectDetailProps) => {
                   transition={{ duration: 0.8 }}
                   className="w-full h-[60vh] md:h-[90vh] overflow-hidden"
                 >
-                  <img
-                    src={item.src}
-                    alt={`Project Gallery ${idx}`}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-[2s]"
-                  />
+                  {item.items[0]?.isVideo ? (
+                    <video src={item.items[0].url} autoPlay muted loop playsInline className="w-full h-full object-cover" />
+                  ) : (
+                    <img src={item.items[0]?.url} alt={`Project Gallery ${idx}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-[2s]" />
+                  )}
                 </motion.div>
               ) : (
                 <div className="flex flex-col md:flex-row w-full gap-1 h-auto md:h-[80vh]">
-                  {item.images?.map((imgSrc, imgIdx) => (
+                  {item.items.map((media, imgIdx) => (
                     <motion.div
                       key={imgIdx}
                       initial={{ opacity: 0, y: 30 }}
@@ -191,11 +192,11 @@ export const ProjectDetail = ({ id, sanityProject }: ProjectDetailProps) => {
                       transition={{ duration: 0.8, delay: imgIdx * 0.2 }}
                       className="w-full md:w-1/2 h-[50vh] md:h-full overflow-hidden"
                     >
-                      <img
-                        src={imgSrc}
-                        alt={`Project Gallery ${idx}-${imgIdx}`}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-[2s]"
-                      />
+                      {media.isVideo ? (
+                        <video src={media.url} autoPlay muted loop playsInline className="w-full h-full object-cover" />
+                      ) : (
+                        <img src={media.url} alt={`Project Gallery ${idx}-${imgIdx}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-[2s]" />
+                      )}
                     </motion.div>
                   ))}
                 </div>

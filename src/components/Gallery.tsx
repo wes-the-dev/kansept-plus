@@ -5,14 +5,13 @@ import { motion, animate, useMotionValue, AnimatePresence } from "motion/react";
 import { X } from "lucide-react";
 import { TransitionLink } from "./TransitionLink";
 import type { SanityGalleryImage } from "@/sanity/lib/queries";
-import { resolveImageUrl } from "@/sanity/lib/imageUrl";
 
 const FALLBACK_IMAGES = [
-  { src: "/images/staircase.jpg", alt: "Modern staircase interior design" },
-  { src: "/images/bedroom.jpg", alt: "Luxury bedroom interior design" },
-  { src: "/images/minimalist-detail.jpg", alt: "Minimalist interior design detail" },
-  { src: "/images/dark-moody.jpg", alt: "Dark moody interior design" },
-  { src: "/images/modern-chair.jpg", alt: "Modern chair furniture design" },
+  { src: "/images/staircase.jpg", alt: "Modern staircase interior design", isVideo: false },
+  { src: "/images/bedroom.jpg", alt: "Luxury bedroom interior design", isVideo: false },
+  { src: "/images/minimalist-detail.jpg", alt: "Minimalist interior design detail", isVideo: false },
+  { src: "/images/dark-moody.jpg", alt: "Dark moody interior design", isVideo: false },
+  { src: "/images/modern-chair.jpg", alt: "Modern chair furniture design", isVideo: false },
 ];
 
 const GAP = 20;
@@ -30,15 +29,20 @@ export const Gallery = ({ sanityImages }: GalleryProps) => {
   const images =
     sanityImages && sanityImages.length > 0
       ? sanityImages.map((g) => ({
-          src: resolveImageUrl(g.image, 900) || "/images/staircase.jpg",
+          src:
+            g.mediaType === "video"
+              ? g.video?.asset?.url || ""
+              : g.image?.asset?.url || "/images/staircase.jpg",
           alt: g.alt || "Gallery image",
+          isVideo: g.mediaType === "video",
         }))
       : FALLBACK_IMAGES;
+  type MediaItem = { src: string; alt: string; isVideo: boolean };
   const [activeIndex, setActiveIndex] = useState(0);
   const [itemWidth, setItemWidth] = useState(420);
   const [isOverStrip, setIsOverStrip] = useState(false);
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
-  const [modalImage, setModalImage] = useState<string | null>(null);
+  const [modalItem, setModalItem] = useState<MediaItem | null>(null);
 
   const wasDragged = useRef(false);
   const x = useMotionValue(0);
@@ -78,7 +82,7 @@ export const Gallery = ({ sanityImages }: GalleryProps) => {
   // Escape key to close modal
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setModalImage(null);
+      if (e.key === "Escape") setModalItem(null);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -125,15 +129,26 @@ export const Gallery = ({ sanityImages }: GalleryProps) => {
               animate={{ height: heightFor(i) }}
               transition={{ duration: 0.55, ease: [0.76, 0, 0.24, 1] }}
               onClick={() => {
-                if (!wasDragged.current) setModalImage(image.src);
+                if (!wasDragged.current) setModalItem(image);
               }}
             >
-              <img
-                src={image.src}
-                alt={image.alt}
-                className="w-full h-full object-cover pointer-events-none select-none"
-                draggable={false}
-              />
+              {image.isVideo ? (
+                <video
+                  src={image.src}
+                  muted
+                  autoPlay
+                  loop
+                  playsInline
+                  className="w-full h-full object-cover pointer-events-none select-none"
+                />
+              ) : (
+                <img
+                  src={image.src}
+                  alt={image.alt}
+                  className="w-full h-full object-cover pointer-events-none select-none"
+                  draggable={false}
+                />
+              )}
             </motion.div>
           ))}
         </motion.div>
@@ -192,28 +207,43 @@ export const Gallery = ({ sanityImages }: GalleryProps) => {
 
       {/* Full-image modal */}
       <AnimatePresence>
-        {modalImage && (
+        {modalItem && (
           <motion.div
             className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/90"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            onClick={() => setModalImage(null)}
+            onClick={() => setModalItem(null)}
           >
-            <motion.img
-              src={modalImage}
-              alt="Full view"
-              className="max-w-[90vw] max-h-[90vh] object-contain"
-              initial={{ scale: 0.92, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.92, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              onClick={(e) => e.stopPropagation()}
-            />
+            {modalItem.isVideo ? (
+              <motion.video
+                src={modalItem.src}
+                controls
+                autoPlay
+                playsInline
+                className="max-w-[90vw] max-h-[90vh] object-contain"
+                initial={{ scale: 0.92, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.92, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                onClick={(e) => e.stopPropagation()}
+              />
+            ) : (
+              <motion.img
+                src={modalItem.src}
+                alt={modalItem.alt}
+                className="max-w-[90vw] max-h-[90vh] object-contain"
+                initial={{ scale: 0.92, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.92, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                onClick={(e) => e.stopPropagation()}
+              />
+            )}
             <button
               className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
-              onClick={() => setModalImage(null)}
+              onClick={() => setModalItem(null)}
             >
               <X size={20} />
             </button>

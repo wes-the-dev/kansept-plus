@@ -3,16 +3,18 @@
 import React from "react";
 import { motion } from "motion/react";
 import type { SanitySettings } from "@/sanity/lib/queries";
-import { resolveImageUrl } from "@/sanity/lib/imageUrl";
+import { resolveMediaAsset } from "@/sanity/lib/imageUrl";
 
 interface ImageQuoteProps {
   settings?: SanitySettings | null;
 }
 
 export const ImageQuote = ({ settings }: ImageQuoteProps) => {
-  const img = resolveImageUrl(settings?.homepage?.imageQuoteImage) ?? "/images/image-quote.png";
+  const media = resolveMediaAsset(settings?.homepage?.imageQuoteImage);
+  const mediaUrl = media?.url ?? "/images/image-quote.png";
+  const isVideo = media?.isVideo ?? false;
   const quote = settings?.homepage?.imageQuote ??
-    "We don’t just design spaces, we build dreams. Every project is a journey from imagination to reality, where design meets craftsmanship.";
+    "We don't just design spaces, we build dreams. Every project is a journey from imagination to reality, where design meets craftsmanship.";
 
   return (
     <section className="bg-[#FFF3EB] px-6 md:px-[60px] py-4 md:pb-20 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-4">
@@ -23,11 +25,11 @@ export const ImageQuote = ({ settings }: ImageQuoteProps) => {
         transition={{ duration: 1 }}
         className="w-full h-[400px] md:h-auto"
       >
-        <img
-          src={img}
-          alt="Interior Design Project Detail"
-          className="w-full h-full object-cover block"
-        />
+        {isVideo ? (
+          <video src={mediaUrl} autoPlay muted loop playsInline className="w-full h-full object-cover block" />
+        ) : (
+          <img src={mediaUrl} alt="Interior Design Project Detail" className="w-full h-full object-cover block" />
+        )}
       </motion.div>
 
       <div className="flex flex-col justify-center px-6 py-10 md:p-[80px_60px]">

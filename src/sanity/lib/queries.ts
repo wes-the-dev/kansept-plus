@@ -2,9 +2,21 @@ import { sanityFetch } from "./client";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
+/** Raw image reference (still used for Portable Text content images inside insights) */
 export interface SanityImageRef {
   _type: "image";
   asset: { _ref: string; _type: "reference" };
+}
+
+/** Resolved media asset — returned from GROQ with asset URL already expanded */
+export interface SanityMediaAsset {
+  mediaType?: "image" | "video";
+  image?: {
+    _type: "image";
+    asset?: { url: string; _id: string };
+    hotspot?: { x: number; y: number; height: number; width: number };
+  };
+  video?: { asset: { url: string; _id: string } };
 }
 
 export interface SanityProject {
@@ -12,12 +24,12 @@ export interface SanityProject {
   title: string;
   slug: { current: string };
   category: string;
-  mainImage?: SanityImageRef;
+  mainImage?: SanityMediaAsset;
   description?: string[];
   details?: { label: string; value: string }[];
   gallery?: Array<{
     layout: "full" | "split";
-    images: SanityImageRef[];
+    images: SanityMediaAsset[];
   }>;
   order?: number;
 }
@@ -31,7 +43,7 @@ export interface SanityInsight {
   author?: string;
   publishedAt?: string;
   readTime?: string;
-  mainImage?: SanityImageRef;
+  mainImage?: SanityMediaAsset;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   content?: any[];
 }
@@ -40,8 +52,7 @@ export interface SanityTeamMember {
   _id: string;
   name: string;
   role?: string;
-  photo?: SanityImageRef;
-  bio?: string;
+  photo?: SanityMediaAsset;
   order?: number;
 }
 
@@ -53,52 +64,57 @@ export interface SanityService {
   heading?: string;
   description?: string;
   serviceItems?: string[];
-  mainImage?: SanityImageRef;
-  secondaryImage?: SanityImageRef;
+  mainImage?: SanityMediaAsset;
+  secondaryImage?: SanityMediaAsset;
   order?: number;
 }
 
 export interface SanityGalleryImage {
   _id: string;
-  image: SanityImageRef;
+  mediaType?: "image" | "video";
+  image?: SanityMediaAsset["image"];
+  video?: { asset: { url: string; _id: string } };
   alt?: string;
   order?: number;
 }
 
 export interface SanitySettings {
   homepage?: {
-    heroImage?: SanityImageRef;
+    heroImage?: SanityMediaAsset;
     heroTagline?: string;
-    studioTitle?: string;
     studioBody?: string;
-    checkerboardImage1?: SanityImageRef;
-    checkerboardImage2?: SanityImageRef;
+    checkerboardImage1?: SanityMediaAsset;
+    checkerboardInteriorText?: string;
+    checkerboardImage2?: SanityMediaAsset;
     imageQuote?: string;
-    imageQuoteImage?: SanityImageRef;
-    dualImage1?: SanityImageRef;
-    dualImage2?: SanityImageRef;
+    imageQuoteImage?: SanityMediaAsset;
+    dualImage1?: SanityMediaAsset;
+    dualImage2?: SanityMediaAsset;
   };
   whoWeAre?: {
-    topImage?: SanityImageRef;
+    topImage?: SanityMediaAsset;
     introParagraph1?: string;
     introParagraph2?: string;
     establishedYear?: string;
-    aboutPhoto?: SanityImageRef;
+    aboutPhoto?: SanityMediaAsset;
     aboutQuote?: string;
     aboutBody?: string;
     leadDesignerName?: string;
     leadDesignerFocus?: string;
+    teamSectionHeading?: string;
+    teamSectionSubtext?: string;
+    processSectionHeading?: string;
     processSteps?: Array<{
       number: string;
       title: string;
       description: string;
       bullets?: string[];
       quote?: string;
-      image?: SanityImageRef;
+      image?: SanityMediaAsset;
     }>;
   };
   servicesPage?: {
-    heroImage?: SanityImageRef;
+    heroImage?: SanityMediaAsset;
     heroHeadline?: string;
     heroSubheadline?: string;
     heroDescription?: string;
@@ -110,11 +126,11 @@ export interface SanitySettings {
     email?: string;
     phone?: string;
     hours?: string;
-    contactImage1?: SanityImageRef;
-    contactImage2?: SanityImageRef;
+    contactImage1?: SanityMediaAsset;
+    contactImage2?: SanityMediaAsset;
   };
   projectsPage?: {
-    heroImage?: SanityImageRef;
+    heroImage?: SanityMediaAsset;
     introHeadline?: string;
     introBody?: string;
   };
@@ -123,23 +139,30 @@ export interface SanitySettings {
     subheading?: string;
   };
   global?: {
-    navbarLogo?: SanityImageRef;
+    navbarLogo?: SanityMediaAsset;
     footerTagline?: string;
+    footerCtaBody?: string;
     instagramUrl?: string;
     linkedinUrl?: string;
     pinterestUrl?: string;
   };
 }
 
-// ─── Queries ─────────────────────────────────────────────────────────────────
+// ─── GROQ fragment helpers ────────────────────────────────────────────────────
 
-const IMAGE_FIELDS = `{ asset->{ url, _id } }`;
+const MEDIA_FIELDS = `{
+  mediaType,
+  image { asset->{ url, _id }, hotspot },
+  video { asset->{ url, _id } }
+}`;
+
+// ─── Queries ─────────────────────────────────────────────────────────────────
 
 export async function getProjects(): Promise<SanityProject[] | null> {
   return sanityFetch<SanityProject[]>(
     `*[_type == "project"] | order(order asc) {
       _id, title, slug, category,
-      mainImage ${IMAGE_FIELDS},
+      mainImage ${MEDIA_FIELDS},
       order
     }`
   );
@@ -149,12 +172,12 @@ export async function getProjectBySlug(slug: string): Promise<SanityProject | nu
   return sanityFetch<SanityProject>(
     `*[_type == "project" && slug.current == $slug][0] {
       _id, title, slug, category,
-      mainImage ${IMAGE_FIELDS},
+      mainImage ${MEDIA_FIELDS},
       description,
       details,
       gallery[] {
         layout,
-        images[] ${IMAGE_FIELDS}
+        images[] ${MEDIA_FIELDS}
       }
     }`,
     { slug }
@@ -165,7 +188,7 @@ export async function getInsights(): Promise<SanityInsight[] | null> {
   return sanityFetch<SanityInsight[]>(
     `*[_type == "insight"] | order(publishedAt desc) {
       _id, title, slug, excerpt, category, author, publishedAt, readTime,
-      mainImage ${IMAGE_FIELDS}
+      mainImage ${MEDIA_FIELDS}
     }`
   );
 }
@@ -174,7 +197,7 @@ export async function getInsightBySlug(slug: string): Promise<SanityInsight | nu
   return sanityFetch<SanityInsight>(
     `*[_type == "insight" && slug.current == $slug][0] {
       _id, title, slug, excerpt, category, author, publishedAt, readTime,
-      mainImage ${IMAGE_FIELDS},
+      mainImage ${MEDIA_FIELDS},
       content[] {
         ...,
         _type == "image" => { ..., asset-> }
@@ -188,8 +211,8 @@ export async function getTeamMembers(): Promise<SanityTeamMember[] | null> {
   return sanityFetch<SanityTeamMember[]>(
     `*[_type == "teamMember"] | order(order asc) {
       _id, name, role,
-      photo ${IMAGE_FIELDS},
-      bio, order
+      photo ${MEDIA_FIELDS},
+      order
     }`
   );
 }
@@ -198,8 +221,8 @@ export async function getServices(): Promise<SanityService[] | null> {
   return sanityFetch<SanityService[]>(
     `*[_type == "service"] | order(order asc) {
       _id, title, slug, tagline, heading, description, serviceItems,
-      mainImage ${IMAGE_FIELDS},
-      secondaryImage ${IMAGE_FIELDS},
+      mainImage ${MEDIA_FIELDS},
+      secondaryImage ${MEDIA_FIELDS},
       order
     }`
   );
@@ -209,7 +232,9 @@ export async function getGalleryImages(): Promise<SanityGalleryImage[] | null> {
   return sanityFetch<SanityGalleryImage[]>(
     `*[_type == "galleryImage"] | order(order asc) {
       _id,
-      image ${IMAGE_FIELDS},
+      mediaType,
+      image { asset->{ url, _id } },
+      video { asset->{ url, _id } },
       alt, order
     }`
   );
@@ -219,44 +244,51 @@ export async function getSiteSettings(): Promise<SanitySettings | null> {
   return sanityFetch<SanitySettings>(
     `*[_type == "siteSettings"][0] {
       homepage {
-        heroImage ${IMAGE_FIELDS},
+        heroImage ${MEDIA_FIELDS},
         heroTagline,
-        studioTitle, studioBody,
-        checkerboardImage1 ${IMAGE_FIELDS},
-        checkerboardImage2 ${IMAGE_FIELDS},
+        studioBody,
+        checkerboardImage1 ${MEDIA_FIELDS},
+        checkerboardInteriorText,
+        checkerboardImage2 ${MEDIA_FIELDS},
         imageQuote,
-        imageQuoteImage ${IMAGE_FIELDS},
-        dualImage1 ${IMAGE_FIELDS},
-        dualImage2 ${IMAGE_FIELDS}
+        imageQuoteImage ${MEDIA_FIELDS},
+        dualImage1 ${MEDIA_FIELDS},
+        dualImage2 ${MEDIA_FIELDS}
       },
       whoWeAre {
-        topImage ${IMAGE_FIELDS},
+        topImage ${MEDIA_FIELDS},
         introParagraph1, introParagraph2,
         establishedYear,
-        aboutPhoto ${IMAGE_FIELDS},
+        aboutPhoto ${MEDIA_FIELDS},
         aboutQuote, aboutBody,
         leadDesignerName, leadDesignerFocus,
+        teamSectionHeading, teamSectionSubtext,
+        processSectionHeading,
         processSteps[] {
           number, title, description, bullets, quote,
-          image ${IMAGE_FIELDS}
+          image ${MEDIA_FIELDS}
         }
       },
       servicesPage {
-        heroImage ${IMAGE_FIELDS},
+        heroImage ${MEDIA_FIELDS},
         heroHeadline, heroSubheadline, heroDescription,
         ctaHeadline, ctaBody
       },
       contact {
         address, email, phone, hours,
-        contactImage1 ${IMAGE_FIELDS},
-        contactImage2 ${IMAGE_FIELDS}
+        contactImage1 ${MEDIA_FIELDS},
+        contactImage2 ${MEDIA_FIELDS}
       },
       projectsPage {
-        heroImage ${IMAGE_FIELDS},
+        heroImage ${MEDIA_FIELDS},
         introHeadline, introBody
       },
       galleryPage { heading, subheading },
-      global { navbarLogo ${IMAGE_FIELDS}, footerTagline, instagramUrl, linkedinUrl, pinterestUrl }
+      global {
+        navbarLogo ${MEDIA_FIELDS},
+        footerTagline, footerCtaBody,
+        instagramUrl, linkedinUrl, pinterestUrl
+      }
     }`
   );
 }

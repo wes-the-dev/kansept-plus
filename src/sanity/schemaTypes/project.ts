@@ -7,21 +7,24 @@ export const project = defineType({
   fields: [
     defineField({
       name: "title",
-      title: "Title",
+      title: "Project Name",
       type: "string",
+      description: "The full name of the project as it will appear on the website (e.g. 'The Lagos Penthouse').",
       validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: "slug",
-      title: "Slug",
+      title: "Slug (URL path)",
       type: "slug",
       options: { source: "title", maxLength: 96 },
+      description: "Auto-generated from the project name. This forms the URL for the project detail page (e.g. /projects/the-lagos-penthouse). Click 'Generate' to create it.",
       validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: "category",
       title: "Category",
       type: "string",
+      description: "Select the category that best describes this project. Used for filtering on the projects page.",
       options: {
         list: [
           { title: "Hotel & Beverage", value: "Hotel & Beverage" },
@@ -34,16 +37,16 @@ export const project = defineType({
     }),
     defineField({
       name: "mainImage",
-      title: "Main Image (used on listing page)",
-      type: "image",
-      options: { hotspot: true },
+      title: "Thumbnail Image / Video",
+      type: "mediaAsset",
+      description: "The cover media shown on the projects listing page and as the hero at the top of the project detail page.",
     }),
     defineField({
       name: "description",
       title: "Project Description",
       type: "array",
       of: [{ type: "text" }],
-      description: "Each item is a paragraph in the project detail page.",
+      description: "Write a description of the project. Add one block per paragraph — each item you add becomes a separate paragraph on the project detail page.",
     }),
     defineField({
       name: "details",
@@ -53,17 +56,28 @@ export const project = defineType({
         {
           type: "object",
           fields: [
-            { name: "label", title: "Label", type: "string" },
-            { name: "value", title: "Value", type: "string" },
+            {
+              name: "label",
+              title: "Label",
+              type: "string",
+              description: "The name of the detail (e.g. 'Location', 'Architect', 'Builder', 'Year').",
+            },
+            {
+              name: "value",
+              title: "Value",
+              type: "string",
+              description: "The corresponding value (e.g. 'Ikoyi, Lagos', '2023').",
+            },
           ],
         },
       ],
-      description: "e.g. Location, Architect, Builder, Photographer, etc.",
+      description: "Key facts about the project shown in a table on the detail page (e.g. Location, Architect, Builder, Photographer, Year).",
     }),
     defineField({
       name: "gallery",
       title: "Gallery",
       type: "array",
+      description: "Add gallery sections to build the visual showcase below the project description. Each section can be full-width or a side-by-side split of two images.",
       of: [
         {
           type: "object",
@@ -74,6 +88,7 @@ export const project = defineType({
               name: "layout",
               title: "Layout",
               type: "string",
+              description: "'Full Width' displays one large image. 'Split (2 images)' displays two images side by side.",
               options: {
                 list: [
                   { title: "Full Width", value: "full" },
@@ -85,7 +100,8 @@ export const project = defineType({
               name: "images",
               title: "Images",
               type: "array",
-              of: [{ type: "image", options: { hotspot: true } }],
+              description: "Upload one image for Full Width layout, or two images for the Split layout.",
+              of: [{ type: "mediaAsset" }],
             },
           ],
         },
@@ -95,7 +111,7 @@ export const project = defineType({
       name: "order",
       title: "Display Order",
       type: "number",
-      description: "Lower numbers appear first.",
+      description: "Controls the position of this project in the projects grid. Lower numbers appear first (e.g. enter '1' to show this project first).",
     }),
   ],
   orderings: [

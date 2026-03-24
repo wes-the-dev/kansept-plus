@@ -6,7 +6,6 @@ import { X } from "lucide-react";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
 import type { SanityGalleryImage, SanitySettings } from "@/sanity/lib/queries";
-import { resolveImageUrl } from "@/sanity/lib/imageUrl";
 
 const FALLBACK_IMAGES = [
   { src: "/images/staircase.jpg", alt: "Modern staircase interior design" },
@@ -21,18 +20,21 @@ interface GalleryPageProps {
   settings?: SanitySettings | null;
 }
 
-type ImageItem = { src: string; alt: string };
+type MediaItem = { src: string; alt: string; isVideo: boolean };
 
 export const GalleryPage = ({ sanityImages, settings }: GalleryPageProps) => {
-  const [modalImage, setModalImage] = useState<ImageItem | null>(null);
-
-  const images: ImageItem[] =
+  const [modalImage, setModalImage] = useState<MediaItem | null>(null);
+  const images: MediaItem[] =
     sanityImages && sanityImages.length > 0
       ? sanityImages.map((g) => ({
-          src: resolveImageUrl(g.image, 1600) || "/images/staircase.jpg",
+          src:
+            g.mediaType === "video"
+              ? g.video?.asset?.url || ""
+              : g.image?.asset?.url || "/images/staircase.jpg",
           alt: g.alt || "Gallery image",
+          isVideo: g.mediaType === "video",
         }))
-      : FALLBACK_IMAGES;
+      : FALLBACK_IMAGES.map((img) => ({ ...img, isVideo: false }));
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -87,11 +89,22 @@ export const GalleryPage = ({ sanityImages, settings }: GalleryPageProps) => {
               className="aspect-[4/3] overflow-hidden cursor-pointer group"
               onClick={() => setModalImage(image)}
             >
-              <img
-                src={image.src}
-                alt={image.alt}
-                className="w-full h-full object-cover group-hover:scale-[1.05] transition-transform duration-700 ease-out"
-              />
+              {image.isVideo ? (
+                <video
+                  src={image.src}
+                  muted
+                  autoPlay
+                  loop
+                  playsInline
+                  className="w-full h-full object-cover group-hover:scale-[1.05] transition-transform duration-700 ease-out"
+                />
+              ) : (
+                <img
+                  src={image.src}
+                  alt={image.alt}
+                  className="w-full h-full object-cover group-hover:scale-[1.05] transition-transform duration-700 ease-out"
+                />
+              )}
             </motion.div>
           ))}
         </div>
@@ -110,16 +123,31 @@ export const GalleryPage = ({ sanityImages, settings }: GalleryPageProps) => {
             transition={{ duration: 0.3 }}
             onClick={() => setModalImage(null)}
           >
-            <motion.img
-              src={modalImage.src}
-              alt={modalImage.alt}
-              className="max-w-[90vw] max-h-[90vh] object-contain"
-              initial={{ scale: 0.92, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.92, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              onClick={(e) => e.stopPropagation()}
-            />
+            {modalImage.isVideo ? (
+              <motion.video
+                src={modalImage.src}
+                controls
+                autoPlay
+                playsInline
+                className="max-w-[90vw] max-h-[90vh] object-contain"
+                initial={{ scale: 0.92, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.92, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                onClick={(e) => e.stopPropagation()}
+              />
+            ) : (
+              <motion.img
+                src={modalImage.src}
+                alt={modalImage.alt}
+                className="max-w-[90vw] max-h-[90vh] object-contain"
+                initial={{ scale: 0.92, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.92, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                onClick={(e) => e.stopPropagation()}
+              />
+            )}
             <button
               className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
               onClick={() => setModalImage(null)}

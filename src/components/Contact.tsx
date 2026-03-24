@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import { Instagram, Linkedin, Youtube, MapPin, Mail, Phone, Clock } from "lucide-react";
 import type { SanitySettings } from "@/sanity/lib/queries";
-import { resolveImageUrl } from "@/sanity/lib/imageUrl";
+import { resolveMediaAsset } from "@/sanity/lib/imageUrl";
 
 interface ContactProps {
   settings?: SanitySettings | null;
@@ -16,7 +16,10 @@ export const Contact = ({ settings }: ContactProps) => {
   const contact = settings?.contact;
   const global = settings?.global;
 
-  const contactImg = resolveImageUrl(contact?.contactImage1) ?? "/images/contact_img.jpg";
+  const contactMedia = resolveMediaAsset(contact?.contactImage1);
+  const contactUrl = contactMedia?.url ?? "/images/contact_img.jpg";
+  const contactIsVideo = contactMedia?.isVideo ?? false;
+
   const address = contact?.address ?? "3C Olumegbon Street\nIkoyi, Lagos, Nigeria";
   const email = contact?.email ?? "koncept09@gmail.com";
   const phone = contact?.phone ?? "+234 123 456 7890";
@@ -64,18 +67,18 @@ export const Contact = ({ settings }: ContactProps) => {
       {/* ── SECTION 1: SPLIT HERO ── */}
       <section className="flex flex-col md:flex-row min-h-screen">
 
-        {/* Left — image */}
+        {/* Left — image or video */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1 }}
           className="w-full md:w-[55%] h-[50vh] md:h-auto relative overflow-hidden"
         >
-          <img
-            src={contactImg}
-            alt="Kansept Plus Studio"
-            className="w-full h-full object-cover"
-          />
+          {contactIsVideo ? (
+            <video src={contactUrl} autoPlay muted loop playsInline className="w-full h-full object-cover" />
+          ) : (
+            <img src={contactUrl} alt="Kansept Plus Studio" className="w-full h-full object-cover" />
+          )}
         </motion.div>
 
         {/* Right — contact info */}
@@ -93,14 +96,11 @@ export const Contact = ({ settings }: ContactProps) => {
             </h1>
 
             <div className="space-y-8 text-[13px] font-light">
-
               <div className="flex gap-4">
                 <MapPin size={15} className="text-[#b5754d] mt-0.5 shrink-0" />
                 <div>
                   <p className="text-[10px] uppercase tracking-[2px] text-[#FFF3EB]/40 mb-1">Address</p>
-                  <p className="text-[#FFF3EB]/80 leading-relaxed whitespace-pre-line">
-                    {address}
-                  </p>
+                  <p className="text-[#FFF3EB]/80 leading-relaxed whitespace-pre-line">{address}</p>
                 </div>
               </div>
 
@@ -108,9 +108,7 @@ export const Contact = ({ settings }: ContactProps) => {
                 <Mail size={15} className="text-[#b5754d] mt-0.5 shrink-0" />
                 <div>
                   <p className="text-[10px] uppercase tracking-[2px] text-[#FFF3EB]/40 mb-1">Email</p>
-                  <a href={`mailto:${email}`} className="text-[#FFF3EB]/80 hover:text-[#b5754d] transition-colors">
-                    {email}
-                  </a>
+                  <a href={`mailto:${email}`} className="text-[#FFF3EB]/80 hover:text-[#b5754d] transition-colors">{email}</a>
                 </div>
               </div>
 
@@ -118,9 +116,7 @@ export const Contact = ({ settings }: ContactProps) => {
                 <Phone size={15} className="text-[#b5754d] mt-0.5 shrink-0" />
                 <div>
                   <p className="text-[10px] uppercase tracking-[2px] text-[#FFF3EB]/40 mb-1">Phone</p>
-                  <a href={`tel:${phone.replace(/\s/g, "")}`} className="text-[#FFF3EB]/80 hover:text-[#b5754d] transition-colors">
-                    {phone}
-                  </a>
+                  <a href={`tel:${phone.replace(/\s/g, "")}`} className="text-[#FFF3EB]/80 hover:text-[#b5754d] transition-colors">{phone}</a>
                 </div>
               </div>
 
@@ -128,9 +124,7 @@ export const Contact = ({ settings }: ContactProps) => {
                 <Clock size={15} className="text-[#b5754d] mt-0.5 shrink-0" />
                 <div>
                   <p className="text-[10px] uppercase tracking-[2px] text-[#FFF3EB]/40 mb-1">Studio Hours</p>
-                  <p className="text-[#FFF3EB]/80 leading-relaxed whitespace-pre-line">
-                    {hours}
-                  </p>
+                  <p className="text-[#FFF3EB]/80 leading-relaxed whitespace-pre-line">{hours}</p>
                 </div>
               </div>
             </div>
@@ -148,7 +142,6 @@ export const Contact = ({ settings }: ContactProps) => {
       <section className="bg-[#FFF3EB] px-6 md:px-[60px] lg:px-[100px] py-24 md:py-36">
         <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-16 lg:gap-24 items-start">
 
-          {/* Left — heading */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -165,7 +158,6 @@ export const Contact = ({ settings }: ContactProps) => {
             </p>
           </motion.div>
 
-          {/* Right — form */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -173,125 +165,64 @@ export const Contact = ({ settings }: ContactProps) => {
             transition={{ duration: 0.8, delay: 0.15 }}
           >
             <form className="space-y-10" onSubmit={handleSubmit}>
-
-                {/* Name row */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                  <div className="border-b border-[#1a3749]/20 pb-3">
-                    <label className="block text-[10px] uppercase tracking-[2px] text-[#1a3749]/40 mb-2">First Name</label>
-                    <input
-                      type="text"
-                      required
-                      value={fields.firstName}
-                      onChange={set("firstName")}
-                      className="w-full bg-transparent border-none focus:outline-none p-0 text-[15px] text-[#1a3749] placeholder:text-[#1a3749]/20 font-light"
-                      placeholder="Jane"
-                    />
-                  </div>
-                  <div className="border-b border-[#1a3749]/20 pb-3">
-                    <label className="block text-[10px] uppercase tracking-[2px] text-[#1a3749]/40 mb-2">Last Name</label>
-                    <input
-                      type="text"
-                      value={fields.lastName}
-                      onChange={set("lastName")}
-                      className="w-full bg-transparent border-none focus:outline-none p-0 text-[15px] text-[#1a3749] placeholder:text-[#1a3749]/20 font-light"
-                      placeholder="Smith"
-                    />
-                  </div>
-                </div>
-
-                {/* Contact row */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                  <div className="border-b border-[#1a3749]/20 pb-3">
-                    <label className="block text-[10px] uppercase tracking-[2px] text-[#1a3749]/40 mb-2">Email Address</label>
-                    <input
-                      type="email"
-                      required
-                      value={fields.email}
-                      onChange={set("email")}
-                      className="w-full bg-transparent border-none focus:outline-none p-0 text-[15px] text-[#1a3749] placeholder:text-[#1a3749]/20 font-light"
-                      placeholder="jane@example.com"
-                    />
-                  </div>
-                  <div className="border-b border-[#1a3749]/20 pb-3">
-                    <label className="block text-[10px] uppercase tracking-[2px] text-[#1a3749]/40 mb-2">Phone Number</label>
-                    <input
-                      type="tel"
-                      value={fields.phone}
-                      onChange={set("phone")}
-                      className="w-full bg-transparent border-none focus:outline-none p-0 text-[15px] text-[#1a3749] placeholder:text-[#1a3749]/20 font-light"
-                      placeholder="+234 000 000 0000"
-                    />
-                  </div>
-                </div>
-
-                {/* Project type */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                 <div className="border-b border-[#1a3749]/20 pb-3">
-                  <label className="block text-[10px] uppercase tracking-[2px] text-[#1a3749]/40 mb-2">Project Type</label>
-                  <select
-                    value={fields.projectType}
-                    onChange={set("projectType")}
-                    className="w-full bg-transparent border-none focus:outline-none p-0 text-[15px] text-[#1a3749] font-light appearance-none"
-                  >
-                    <option value="" disabled>Select a service</option>
-                    <option>Interior Design</option>
-                    <option>Civil Construction</option>
-                    <option>Interior Design &amp; Construction</option>
-                    <option>Consultation</option>
-                    <option>Other</option>
-                  </select>
+                  <label className="block text-[10px] uppercase tracking-[2px] text-[#1a3749]/40 mb-2">First Name</label>
+                  <input type="text" required value={fields.firstName} onChange={set("firstName")} className="w-full bg-transparent border-none focus:outline-none p-0 text-[15px] text-[#1a3749] placeholder:text-[#1a3749]/20 font-light" placeholder="Jane" />
                 </div>
-
-                {/* Location */}
                 <div className="border-b border-[#1a3749]/20 pb-3">
-                  <label className="block text-[10px] uppercase tracking-[2px] text-[#1a3749]/40 mb-2">Project Location</label>
-                  <input
-                    type="text"
-                    value={fields.projectLocation}
-                    onChange={set("projectLocation")}
-                    className="w-full bg-transparent border-none focus:outline-none p-0 text-[15px] text-[#1a3749] placeholder:text-[#1a3749]/20 font-light"
-                    placeholder="City, Country"
-                  />
+                  <label className="block text-[10px] uppercase tracking-[2px] text-[#1a3749]/40 mb-2">Last Name</label>
+                  <input type="text" value={fields.lastName} onChange={set("lastName")} className="w-full bg-transparent border-none focus:outline-none p-0 text-[15px] text-[#1a3749] placeholder:text-[#1a3749]/20 font-light" placeholder="Smith" />
                 </div>
+              </div>
 
-                {/* Message */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                 <div className="border-b border-[#1a3749]/20 pb-3">
-                  <label className="block text-[10px] uppercase tracking-[2px] text-[#1a3749]/40 mb-2">Tell Us About Your Project</label>
-                  <textarea
-                    rows={4}
-                    value={fields.message}
-                    onChange={set("message")}
-                    className="w-full bg-transparent border-none focus:outline-none p-0 text-[15px] text-[#1a3749] placeholder:text-[#1a3749]/20 font-light resize-none"
-                    placeholder="Describe your vision, space, or any specific requirements…"
-                  />
+                  <label className="block text-[10px] uppercase tracking-[2px] text-[#1a3749]/40 mb-2">Email Address</label>
+                  <input type="email" required value={fields.email} onChange={set("email")} className="w-full bg-transparent border-none focus:outline-none p-0 text-[15px] text-[#1a3749] placeholder:text-[#1a3749]/20 font-light" placeholder="jane@example.com" />
                 </div>
-
-                {/* Consent + Submit */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pt-2">
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={consent}
-                      onChange={(e) => setConsent(e.target.checked)}
-                      className="w-4 h-4 rounded-none border border-[#1a3749]/30 text-[#b5754d] focus:ring-0 accent-[#b5754d]"
-                    />
-                    <span className="text-[11px] font-light text-[#1a3749]/50 leading-relaxed">
-                      I agree to the processing of my personal data.
-                    </span>
-                  </label>
-
-                  <button
-                    type="submit"
-                    disabled={!consent || formState === "submitting" || formState === "success"}
-                    className="shrink-0 px-10 py-4 bg-[#1a3749] text-[#FFF3EB] text-[11px] uppercase tracking-[3px] font-medium hover:bg-[#b5754d] transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {formState === "submitting" ? "Sending…" : formState === "success" ? "Submitted" : "Send Enquiry"}
-                  </button>
+                <div className="border-b border-[#1a3749]/20 pb-3">
+                  <label className="block text-[10px] uppercase tracking-[2px] text-[#1a3749]/40 mb-2">Phone Number</label>
+                  <input type="tel" value={fields.phone} onChange={set("phone")} className="w-full bg-transparent border-none focus:outline-none p-0 text-[15px] text-[#1a3749] placeholder:text-[#1a3749]/20 font-light" placeholder="+234 000 000 0000" />
                 </div>
+              </div>
 
-                {formState === "error" && (
-                  <p className="text-[12px] text-red-600 font-light">Something went wrong. Please try again or email us directly.</p>
-                )}
-              </form>
+              <div className="border-b border-[#1a3749]/20 pb-3">
+                <label className="block text-[10px] uppercase tracking-[2px] text-[#1a3749]/40 mb-2">Project Type</label>
+                <select value={fields.projectType} onChange={set("projectType")} className="w-full bg-transparent border-none focus:outline-none p-0 text-[15px] text-[#1a3749] font-light appearance-none">
+                  <option value="" disabled>Select a service</option>
+                  <option>Interior Design</option>
+                  <option>Civil Construction</option>
+                  <option>Interior Design &amp; Construction</option>
+                  <option>Consultation</option>
+                  <option>Other</option>
+                </select>
+              </div>
+
+              <div className="border-b border-[#1a3749]/20 pb-3">
+                <label className="block text-[10px] uppercase tracking-[2px] text-[#1a3749]/40 mb-2">Project Location</label>
+                <input type="text" value={fields.projectLocation} onChange={set("projectLocation")} className="w-full bg-transparent border-none focus:outline-none p-0 text-[15px] text-[#1a3749] placeholder:text-[#1a3749]/20 font-light" placeholder="City, Country" />
+              </div>
+
+              <div className="border-b border-[#1a3749]/20 pb-3">
+                <label className="block text-[10px] uppercase tracking-[2px] text-[#1a3749]/40 mb-2">Tell Us About Your Project</label>
+                <textarea rows={4} value={fields.message} onChange={set("message")} className="w-full bg-transparent border-none focus:outline-none p-0 text-[15px] text-[#1a3749] placeholder:text-[#1a3749]/20 font-light resize-none" placeholder="Describe your vision, space, or any specific requirements…" />
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pt-2">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="w-4 h-4 rounded-none border border-[#1a3749]/30 text-[#b5754d] focus:ring-0 accent-[#b5754d]" />
+                  <span className="text-[11px] font-light text-[#1a3749]/50 leading-relaxed">I agree to the processing of my personal data.</span>
+                </label>
+                <button type="submit" disabled={!consent || formState === "submitting" || formState === "success"} className="shrink-0 px-10 py-4 bg-[#1a3749] text-[#FFF3EB] text-[11px] uppercase tracking-[3px] font-medium hover:bg-[#b5754d] transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                  {formState === "submitting" ? "Sending…" : formState === "success" ? "Submitted" : "Send Enquiry"}
+                </button>
+              </div>
+
+              {formState === "error" && (
+                <p className="text-[12px] text-red-600 font-light">Something went wrong. Please try again or email us directly.</p>
+              )}
+            </form>
           </motion.div>
 
         </div>

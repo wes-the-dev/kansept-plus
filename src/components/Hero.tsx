@@ -3,26 +3,39 @@
 import React from "react";
 import { motion } from "motion/react";
 import type { SanitySettings } from "@/sanity/lib/queries";
-import { resolveImageUrl } from "@/sanity/lib/imageUrl";
+import { resolveMediaAsset } from "@/sanity/lib/imageUrl";
 
 interface HeroProps {
   settings?: SanitySettings | null;
 }
 
 export const Hero = ({ settings }: HeroProps) => {
-  const heroImage = resolveImageUrl(settings?.homepage?.heroImage) ?? "/images/hero-home.png";
+  const heroMedia = resolveMediaAsset(settings?.homepage?.heroImage);
+  const heroUrl = heroMedia?.url ?? "/images/hero-home.png";
+  const isVideo = heroMedia?.isVideo ?? false;
   const tagline = settings?.homepage?.heroTagline ?? "Imagine | Design | Build";
 
   return (
     <section className="relative w-full h-screen overflow-hidden" id="home">
-      <motion.img
-        initial={{ scale: 1.1 }}
-        animate={{ scale: 1 }}
-        transition={{ duration: 1.5, ease: "easeOut" }}
-        src={heroImage}
-        alt="Kansept Plus Interior Design Project"
-        className="w-full h-full object-cover"
-      />
+      {isVideo ? (
+        <video
+          src={heroUrl}
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="w-full h-full object-cover"
+        />
+      ) : (
+        <motion.img
+          initial={{ scale: 1.1 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
+          src={heroUrl}
+          alt="Kansept Plus Interior Design Project"
+          className="w-full h-full object-cover"
+        />
+      )}
       <div className="absolute bottom-10 left-6 md:bottom-20 md:left-[60px] z-20">
         <motion.div
           initial={{ opacity: 0, x: -30 }}

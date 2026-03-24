@@ -4,15 +4,29 @@ import React from "react";
 import { motion } from "motion/react";
 import { TransitionLink } from "./TransitionLink";
 import type { SanitySettings } from "@/sanity/lib/queries";
-import { resolveImageUrl } from "@/sanity/lib/imageUrl";
+import { resolveMediaAsset } from "@/sanity/lib/imageUrl";
 
 interface CheckerboardProps {
   settings?: SanitySettings | null;
 }
 
+function MediaEl({ url, isVideo, alt, className }: { url: string; isVideo: boolean; alt: string; className: string }) {
+  return isVideo ? (
+    <video src={url} autoPlay muted loop playsInline className={className} />
+  ) : (
+    <img src={url} alt={alt} className={className} />
+  );
+}
+
 export const Checkerboard = ({ settings }: CheckerboardProps) => {
-  const img1 = resolveImageUrl(settings?.homepage?.checkerboardImage1) ?? "/images/checkerboard-interior.png";
-  const img2 = resolveImageUrl(settings?.homepage?.checkerboardImage2) ?? "/images/checkerboard-who-we-are.png";
+  const media1 = resolveMediaAsset(settings?.homepage?.checkerboardImage1);
+  const img1Url = media1?.url ?? "/images/checkerboard-interior.png";
+  const img1IsVideo = media1?.isVideo ?? false;
+
+  const media2 = resolveMediaAsset(settings?.homepage?.checkerboardImage2);
+  const img2Url = media2?.url ?? "/images/checkerboard-who-we-are.png";
+  const img2IsVideo = media2?.isVideo ?? false;
+
   const whoWeAreText = settings?.whoWeAre?.introParagraph1 ??
     "Kansept Plus is an established interior design studio based in Ikoyi, Lagos. We specialize in both interior design and civil construction, offering comprehensive solutions from concept to completion. Our integrated approach ensures seamless project execution, delivering spaces that are both beautifully designed and expertly built.";
 
@@ -21,15 +35,15 @@ export const Checkerboard = ({ settings }: CheckerboardProps) => {
       {/* Row 1: Dark Image Left | Dark Text Right */}
       <div className="grid grid-cols-1 md:grid-cols-[58%_42%]" id="interiors">
         <div className="bg-[#1a3749] min-h-[300px] md:min-h-[540px] flex items-center justify-center p-8 md:p-[60px]">
-          <motion.img
+          <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            src={img1}
-            alt="Interior Design Project"
-            className="w-full h-full object-cover max-h-[700px]"
-          />
+            className="w-full h-full max-h-[700px]"
+          >
+            <MediaEl url={img1Url} isVideo={img1IsVideo} alt="Interior Design Project" className="w-full h-full object-cover" />
+          </motion.div>
         </div>
         <div className="bg-[#1a3749] text-[#FFF3EB] p-10 md:p-[100px_80px] flex items-center">
           <motion.div
@@ -71,15 +85,15 @@ export const Checkerboard = ({ settings }: CheckerboardProps) => {
           </motion.div>
         </div>
         <div className="bg-[#FFF3EB] p-8 md:p-[80px]">
-          <motion.img
+          <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            src={img2}
-            alt="Interior Design Detail"
-            className="w-full h-full object-cover min-h-[300px] md:min-h-[500px]"
-          />
+            className="w-full h-full min-h-[300px] md:min-h-[500px]"
+          >
+            <MediaEl url={img2Url} isVideo={img2IsVideo} alt="Interior Design Detail" className="w-full h-full object-cover" />
+          </motion.div>
         </div>
       </div>
     </section>
