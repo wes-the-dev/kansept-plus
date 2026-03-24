@@ -66,7 +66,7 @@ export const Header = ({ settings }: HeaderProps) => {
     }
   };
 
-  const isDarkPage = ["/who-we-are", "/services", "/insights", "/contact"].includes(pathname);
+  const isDarkPage = ["/who-we-are", "/services", "/insights", "/contact", "/gallery"].includes(pathname);
 
   // Hamburger bar color: dark when scrolled, menu open, or on a light-header page
   const barColor =

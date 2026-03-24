@@ -118,6 +118,10 @@ export interface SanitySettings {
     introHeadline?: string;
     introBody?: string;
   };
+  galleryPage?: {
+    heading?: string;
+    subheading?: string;
+  };
   global?: {
     navbarLogo?: SanityImageRef;
     footerTagline?: string;
@@ -251,6 +255,7 @@ export async function getSiteSettings(): Promise<SanitySettings | null> {
         heroImage ${IMAGE_FIELDS},
         introHeadline, introBody
       },
+      galleryPage { heading, subheading },
       global { navbarLogo ${IMAGE_FIELDS}, footerTagline, instagramUrl, linkedinUrl, pinterestUrl }
     }`
   );

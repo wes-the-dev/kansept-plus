@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { motion, animate, useMotionValue, AnimatePresence } from "motion/react";
 import { X } from "lucide-react";
+import { TransitionLink } from "./TransitionLink";
 import type { SanityGalleryImage } from "@/sanity/lib/queries";
 import { resolveImageUrl } from "@/sanity/lib/imageUrl";
 
@@ -161,6 +162,16 @@ export const Gallery = ({ sanityImages }: GalleryProps) => {
             )}
           </button>
         ))}
+      </div>
+
+      {/* CTA */}
+      <div className="flex justify-center mt-10">
+        <TransitionLink
+          href="/gallery"
+          className="inline-flex items-center gap-3 border border-[#1a3749]/30 text-[#1a3749] text-[11px] uppercase tracking-[2.5px] px-8 py-4 hover:bg-[#1a3749] hover:text-[#FFF3EB] hover:border-[#1a3749] transition-all duration-300"
+        >
+          View Full Gallery
+        </TransitionLink>
       </div>
 
       {/* Custom drag cursor — only visible when over the image strip */}

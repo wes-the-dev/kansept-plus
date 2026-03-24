@@ -107,6 +107,27 @@ export const siteSettings = defineType({
       ],
     }),
 
+    // ── GALLERY PAGE ──────────────────────────────────────────────
+    defineField({
+      name: "galleryPage",
+      title: "Gallery Page",
+      type: "object",
+      fields: [
+        {
+          name: "heading",
+          title: "Page Heading",
+          type: "string",
+          description: "Main heading displayed on the gallery page (e.g. 'A Glimpse of Kansept Plus').",
+        },
+        {
+          name: "subheading",
+          title: "Page Subheading",
+          type: "string",
+          description: "Short descriptive line shown beside the heading.",
+        },
+      ],
+    }),
+
     // ── FOOTER / GLOBAL ───────────────────────────────────────────
     defineField({
       name: "global",
