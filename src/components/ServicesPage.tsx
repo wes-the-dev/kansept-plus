@@ -18,7 +18,7 @@ export const ServicesPage = ({ sanityServices, settings }: ServicesPageProps) =>
 
   return (
     <div className="bg-[#FFF3EB] min-h-screen text-[#1a3749]">
-      <Header />
+      <Header settings={settings} />
 
       <main>
         <Services sanityServices={sanityServices} settings={settings} />

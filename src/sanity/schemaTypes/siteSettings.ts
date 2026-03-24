@@ -13,8 +13,6 @@ export const siteSettings = defineType({
       fields: [
         { name: "heroImage", title: "Hero Image", type: "image", options: { hotspot: true } },
         { name: "heroTagline", title: "Hero Tagline", type: "string", description: "Small label above the headline (e.g. 'Interior Design & Construction')" },
-        { name: "heroHeadline", title: "Hero Headline", type: "string" },
-        { name: "heroCta", title: "Hero CTA Button Label", type: "string" },
         { name: "studioTitle", title: "Studio Description Title", type: "string" },
         { name: "studioBody", title: "Studio Description Body", type: "text", rows: 4 },
         { name: "checkerboardImage1", title: "Checkerboard Image 1", type: "image", options: { hotspot: true } },
@@ -115,6 +113,7 @@ export const siteSettings = defineType({
       title: "Global / Footer",
       type: "object",
       fields: [
+        { name: "navbarLogo", title: "Navbar Logo", type: "image", options: { hotspot: true }, description: "Upload the logo image displayed in the centre of the navigation bar." },
         { name: "footerTagline", title: "Footer Tagline", type: "string" },
         { name: "instagramUrl", title: "Instagram URL", type: "url" },
         { name: "linkedinUrl", title: "LinkedIn URL", type: "url" },

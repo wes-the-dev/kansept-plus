@@ -33,7 +33,7 @@ export const HomePage = ({ sanityGallery, settings }: HomePageProps) => {
 
   return (
     <div className="bg-[#FFF3EB] min-h-[100vh] text-[#1a3749]">
-      <Header />
+      <Header settings={settings} />
 
       <main>
         <Hero settings={settings} />

@@ -17,7 +17,7 @@ export const ContactPage = ({ settings }: ContactPageProps) => {
 
   return (
     <div className="bg-[#FFF3EB] min-h-screen text-[#1a3749]">
-      <Header />
+      <Header settings={settings} />
       <main>
         <Contact settings={settings} />
       </main>

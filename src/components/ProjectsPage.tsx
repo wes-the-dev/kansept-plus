@@ -18,7 +18,7 @@ export const ProjectsPage = ({ sanityProjects, settings }: ProjectsPageProps) =>
 
   return (
     <div className="bg-[#FFF3EB] min-h-[100vh] text-[#1a3749]">
-      <Header />
+      <Header settings={settings} />
 
       <main>
         <Projects sanityProjects={sanityProjects} settings={settings} />

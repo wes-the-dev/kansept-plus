@@ -18,7 +18,7 @@ export const WhoWeArePage = ({ sanityTeam, settings }: WhoWeArePageProps) => {
 
   return (
     <div className="bg-[#FFF3EB] min-h-screen text-[#1a3749]">
-      <Header />
+      <Header settings={settings} />
 
       <main>
         <WhoWeAre sanityTeam={sanityTeam} settings={settings} />

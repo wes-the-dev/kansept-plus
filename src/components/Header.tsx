@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { usePageTransition } from "./PageTransitionProvider";
+import type { SanitySettings } from "@/sanity/lib/queries";
+import { resolveImageUrl } from "@/sanity/lib/imageUrl";
 
 const navItems = [
   { name: "Home", href: "/" },
@@ -15,7 +17,12 @@ const navItems = [
   { name: "Contact", href: "/contact" },
 ];
 
-export const Header = () => {
+interface HeaderProps {
+  settings?: SanitySettings | null;
+}
+
+export const Header = ({ settings }: HeaderProps) => {
+  const logoUrl = resolveImageUrl(settings?.global?.navbarLogo);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
   const [lastY, setLastY] = useState(0);
@@ -97,13 +104,22 @@ export const Header = () => {
           </button>
 
           {/* Logo */}
-          <Link
-            href="/"
-            className={`absolute left-1/2 -translate-x-1/2 text-base font-medium uppercase tracking-[3px] transition-colors duration-300 ${
-              isScrolled || isMenuOpen || isDarkPage ? "text-[#1a3749]" : "text-white"
-            }`}
-          >
-            Kansept Plus
+          <Link href="/" className="absolute left-1/2 -translate-x-1/2">
+            {logoUrl ? (
+              <img
+                src={logoUrl}
+                alt="Kansept Plus"
+                className="h-8 w-auto object-contain"
+              />
+            ) : (
+              <span
+                className={`text-base font-medium uppercase tracking-[3px] transition-colors duration-300 ${
+                  isScrolled || isMenuOpen || isDarkPage ? "text-[#1a3749]" : "text-white"
+                }`}
+              >
+                Kansept Plus
+              </span>
+            )}
           </Link>
 
           {/* CTA */}

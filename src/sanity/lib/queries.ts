@@ -69,8 +69,6 @@ export interface SanitySettings {
   homepage?: {
     heroImage?: SanityImageRef;
     heroTagline?: string;
-    heroHeadline?: string;
-    heroCta?: string;
     studioTitle?: string;
     studioBody?: string;
     checkerboardImage1?: SanityImageRef;
@@ -121,6 +119,7 @@ export interface SanitySettings {
     introBody?: string;
   };
   global?: {
+    navbarLogo?: SanityImageRef;
     footerTagline?: string;
     instagramUrl?: string;
     linkedinUrl?: string;
@@ -217,7 +216,7 @@ export async function getSiteSettings(): Promise<SanitySettings | null> {
     `*[_type == "siteSettings"][0] {
       homepage {
         heroImage ${IMAGE_FIELDS},
-        heroTagline, heroHeadline, heroCta,
+        heroTagline,
         studioTitle, studioBody,
         checkerboardImage1 ${IMAGE_FIELDS},
         checkerboardImage2 ${IMAGE_FIELDS},
@@ -252,7 +251,7 @@ export async function getSiteSettings(): Promise<SanitySettings | null> {
         heroImage ${IMAGE_FIELDS},
         introHeadline, introBody
       },
-      global { footerTagline, instagramUrl, linkedinUrl, pinterestUrl }
+      global { navbarLogo ${IMAGE_FIELDS}, footerTagline, instagramUrl, linkedinUrl, pinterestUrl }
     }`
   );
 }
