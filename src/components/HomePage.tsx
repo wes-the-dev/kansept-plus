@@ -9,8 +9,14 @@ import { DualImages } from "./DualImages";
 import { ImageQuote } from "./ImageQuote";
 import { Gallery } from "./Gallery";
 import { Footer } from "./Footer";
+import type { SanityGalleryImage, SanitySettings } from "@/sanity/lib/queries";
 
-export const HomePage = () => {
+interface HomePageProps {
+  sanityGallery?: SanityGalleryImage[] | null;
+  settings?: SanitySettings | null;
+}
+
+export const HomePage = ({ sanityGallery, settings }: HomePageProps) => {
   useEffect(() => {
     const hash = window.location.hash;
     if (hash) {
@@ -30,15 +36,15 @@ export const HomePage = () => {
       <Header />
 
       <main>
-        <Hero />
-        <StudioDescription />
-        <Checkerboard />
-        <DualImages />
-        <ImageQuote />
-        <Gallery />
+        <Hero settings={settings} />
+        <StudioDescription settings={settings} />
+        <Checkerboard settings={settings} />
+        <DualImages settings={settings} />
+        <ImageQuote settings={settings} />
+        <Gallery sanityImages={sanityGallery} />
       </main>
 
-      <Footer />
+      <Footer settings={settings} />
     </div>
   );
 };

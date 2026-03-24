@@ -3,14 +3,24 @@
 import React from "react";
 import { Instagram, Linkedin, Youtube, MapPin } from "lucide-react";
 import { TransitionLink } from "./TransitionLink";
+import type { SanitySettings } from "@/sanity/lib/queries";
 
-export const Footer = () => {
+interface FooterProps {
+  settings?: SanitySettings | null;
+}
+
+export const Footer = ({ settings }: FooterProps) => {
+  const tagline = settings?.global?.footerTagline ?? "Imagine | Design | Build";
+  const instagramUrl = settings?.global?.instagramUrl ?? "#";
+  const linkedinUrl = settings?.global?.linkedinUrl ?? "#";
+  const pinterestUrl = settings?.global?.pinterestUrl ?? "#";
+
   return (
     <footer className="bg-[#1a3749] text-[#FFF3EB] pt-20 pb-10 px-6 md:px-[60px]" id="enquire">
       {/* Logo Section */}
       <div className="text-center mb-16 md:mb-20">
         <h2 className="text-4xl md:text-5xl font-medium tracking-[3px] mb-2">Kansept Plus</h2>
-        <p className="text-[11px] font-light tracking-[3px] uppercase text-[#b5754d]">Imagine | Design | Build</p>
+        <p className="text-[11px] font-light tracking-[3px] uppercase text-[#b5754d]">{tagline}</p>
       </div>
 
       {/* Main Content Grid */}
@@ -71,9 +81,9 @@ export const Footer = () => {
 
       {/* Social & Bottom */}
       <div className="flex justify-center gap-8 mb-8">
-        <a href="#" className="opacity-70 hover:opacity-100 hover:text-[#b5754d] transition-all"><Linkedin size={20} /></a>
-        <a href="#" className="opacity-70 hover:opacity-100 hover:text-[#b5754d] transition-all"><Instagram size={20} /></a>
-        <a href="#" className="opacity-70 hover:opacity-100 hover:text-[#b5754d] transition-all"><Youtube size={20} /></a>
+        <a href={linkedinUrl} className="opacity-70 hover:opacity-100 hover:text-[#b5754d] transition-all"><Linkedin size={20} /></a>
+        <a href={instagramUrl} className="opacity-70 hover:opacity-100 hover:text-[#b5754d] transition-all"><Instagram size={20} /></a>
+        <a href={pinterestUrl} className="opacity-70 hover:opacity-100 hover:text-[#b5754d] transition-all"><Youtube size={20} /></a>
       </div>
 
       <div className="text-center mb-6 opacity-60 flex items-center justify-center gap-2 text-[11px] font-light tracking-[2px]">

@@ -4,8 +4,14 @@ import React, { useEffect } from "react";
 import { Header } from "./Header";
 import { Services } from "./Services";
 import { Footer } from "./Footer";
+import type { SanityService, SanitySettings } from "@/sanity/lib/queries";
 
-export const ServicesPage = () => {
+interface ServicesPageProps {
+  sanityServices?: SanityService[] | null;
+  settings?: SanitySettings | null;
+}
+
+export const ServicesPage = ({ sanityServices, settings }: ServicesPageProps) => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -15,10 +21,10 @@ export const ServicesPage = () => {
       <Header />
 
       <main>
-        <Services />
+        <Services sanityServices={sanityServices} settings={settings} />
       </main>
 
-      <Footer />
+      <Footer settings={settings} />
     </div>
   );
 };

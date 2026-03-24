@@ -2,8 +2,17 @@
 
 import React from "react";
 import { motion } from "motion/react";
+import type { SanitySettings } from "@/sanity/lib/queries";
+import { resolveImageUrl } from "@/sanity/lib/imageUrl";
 
-export const DualImages = () => {
+interface DualImagesProps {
+  settings?: SanitySettings | null;
+}
+
+export const DualImages = ({ settings }: DualImagesProps) => {
+  const img1 = resolveImageUrl(settings?.homepage?.dualImage1) ?? "/images/staircase.jpg";
+  const img2 = resolveImageUrl(settings?.homepage?.dualImage2) ?? "/images/bedroom.jpg";
+
   return (
     <section className="bg-[#FFF3EB] px-6 md:px-[60px] pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
       <motion.div
@@ -14,8 +23,8 @@ export const DualImages = () => {
         className="w-full"
       >
         <img
-          src="/images/staircase.jpg"
-          alt="Interior Design Project - Staircase"
+          src={img1}
+          alt="Interior Design Project"
           className="w-full h-[350px] md:h-[680px] object-cover"
         />
       </motion.div>
@@ -27,7 +36,7 @@ export const DualImages = () => {
         className="w-full"
       >
         <img
-          src="/images/bedroom.jpg"
+          src={img2}
           alt="Residential Interior Design"
           className="w-full h-[350px] md:h-[680px] object-cover"
         />

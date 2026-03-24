@@ -4,8 +4,13 @@ import React, { useEffect } from "react";
 import { Header } from "./Header";
 import { Insights } from "./Insights";
 import { Footer } from "./Footer";
+import type { SanityInsight } from "@/sanity/lib/queries";
 
-export const InsightsPage = () => {
+interface InsightsPageProps {
+  sanityInsights?: SanityInsight[] | null;
+}
+
+export const InsightsPage = ({ sanityInsights }: InsightsPageProps) => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -15,7 +20,7 @@ export const InsightsPage = () => {
       <Header />
 
       <main>
-        <Insights />
+        <Insights sanityInsights={sanityInsights} />
       </main>
 
       <Footer />

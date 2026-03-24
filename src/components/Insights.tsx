@@ -5,17 +5,42 @@ import { motion } from "motion/react";
 import { TransitionLink } from "./TransitionLink";
 import { ArrowRight, Search, Clock } from "lucide-react";
 import { blogPosts } from "@/data/blogData";
+import type { SanityInsight } from "@/sanity/lib/queries";
+import { resolveImageUrl } from "@/sanity/lib/imageUrl";
 
 const categories = ["All", "Interior Design", "Construction", "Design Trends", "Wellness"];
 
-export const Insights = () => {
+interface InsightsProps {
+  sanityInsights?: SanityInsight[] | null;
+}
+
+// Normalise a Sanity insight into the same shape used for the blog posts
+function sanityToPost(p: SanityInsight) {
+  return {
+    id: p.slug.current,
+    title: p.title,
+    excerpt: p.excerpt || "",
+    category: p.category || "Design Trends",
+    author: p.author || "",
+    date: p.publishedAt ? new Date(p.publishedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "",
+    readTime: p.readTime || "",
+    image: resolveImageUrl(p.mainImage, 800) || "/images/blog-1.jpg",
+  };
+}
+
+export const Insights = ({ sanityInsights }: InsightsProps) => {
   const [activeCategory, setActiveCategory] = useState("All");
 
-  const filteredPosts = activeCategory === "All"
-    ? blogPosts
-    : blogPosts.filter((post) => post.category === activeCategory);
+  const allPosts =
+    sanityInsights && sanityInsights.length > 0
+      ? sanityInsights.map(sanityToPost)
+      : blogPosts.map((p) => ({ ...p, id: String(p.id) }));
 
-  const featuredPost = blogPosts[0];
+  const filteredPosts = activeCategory === "All"
+    ? allPosts
+    : allPosts.filter((post) => post.category === activeCategory);
+
+  const featuredPost = allPosts[0];
   const remainingPosts = filteredPosts.filter((post) => post.id !== featuredPost.id);
 
   return (

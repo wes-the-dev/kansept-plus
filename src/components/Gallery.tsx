@@ -3,8 +3,10 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { motion, animate, useMotionValue, AnimatePresence } from "motion/react";
 import { X } from "lucide-react";
+import type { SanityGalleryImage } from "@/sanity/lib/queries";
+import { resolveImageUrl } from "@/sanity/lib/imageUrl";
 
-const images = [
+const FALLBACK_IMAGES = [
   { src: "/images/staircase.jpg", alt: "Modern staircase interior design" },
   { src: "/images/bedroom.jpg", alt: "Luxury bedroom interior design" },
   { src: "/images/minimalist-detail.jpg", alt: "Minimalist interior design detail" },
@@ -19,7 +21,18 @@ const AUTO_ADVANCE_MS = 4000;
 const HEIGHTS_DESKTOP = [580, 420, 320] as const; // [centre, ±1, ±2+]
 const HEIGHTS_MOBILE = [360, 270, 210] as const;
 
-export const Gallery = () => {
+interface GalleryProps {
+  sanityImages?: SanityGalleryImage[] | null;
+}
+
+export const Gallery = ({ sanityImages }: GalleryProps) => {
+  const images =
+    sanityImages && sanityImages.length > 0
+      ? sanityImages.map((g) => ({
+          src: resolveImageUrl(g.image, 900) || "/images/staircase.jpg",
+          alt: g.alt || "Gallery image",
+        }))
+      : FALLBACK_IMAGES;
   const [activeIndex, setActiveIndex] = useState(0);
   const [itemWidth, setItemWidth] = useState(420);
   const [isOverStrip, setIsOverStrip] = useState(false);

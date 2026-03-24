@@ -4,8 +4,14 @@ import React, { useEffect } from "react";
 import { Header } from "./Header";
 import { WhoWeAre } from "./WhoWeAre";
 import { Footer } from "./Footer";
+import type { SanityTeamMember, SanitySettings } from "@/sanity/lib/queries";
 
-export const WhoWeArePage = () => {
+interface WhoWeArePageProps {
+  sanityTeam?: SanityTeamMember[] | null;
+  settings?: SanitySettings | null;
+}
+
+export const WhoWeArePage = ({ sanityTeam, settings }: WhoWeArePageProps) => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -15,10 +21,10 @@ export const WhoWeArePage = () => {
       <Header />
 
       <main>
-        <WhoWeAre />
+        <WhoWeAre sanityTeam={sanityTeam} settings={settings} />
       </main>
 
-      <Footer />
+      <Footer settings={settings} />
     </div>
   );
 };

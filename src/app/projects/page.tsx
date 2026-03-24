@@ -1,5 +1,10 @@
 import { ProjectsPage } from "@/components/ProjectsPage";
+import { getProjects, getSiteSettings } from "@/sanity/lib/queries";
 
-export default function Page() {
-  return <ProjectsPage />;
+export default async function Page() {
+  const [sanityProjects, settings] = await Promise.all([
+    getProjects(),
+    getSiteSettings(),
+  ]);
+  return <ProjectsPage sanityProjects={sanityProjects} settings={settings} />;
 }

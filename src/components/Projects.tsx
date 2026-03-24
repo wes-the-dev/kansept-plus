@@ -3,54 +3,50 @@
 import React from "react";
 import { TransitionLink } from "./TransitionLink";
 import { motion } from "motion/react";
+import type { SanityProject, SanitySettings } from "@/sanity/lib/queries";
+import { resolveImageUrl } from "@/sanity/lib/imageUrl";
 
-const projects = [
-  {
-    id: 1,
-    title: "Project A",
-    category: "Hotel & Beverage, Hotels",
-    image: "/images/project-a.jpg",
-  },
-  {
-    id: 2,
-    title: "Project B",
-    category: "Hotels",
-    image: "/images/project-b.jpg",
-  },
-  {
-    id: 3,
-    title: "Project C",
-    category: "Hotels",
-    image: "/images/project-c.jpg",
-  },
-  {
-    id: 4,
-    title: "Project D",
-    category: "Private Residential",
-    image: "/images/project-d.jpg",
-  },
-  {
-    id: 5,
-    title: "Project E",
-    category: "Private Residential",
-    image: "/images/project-e.jpg",
-  },
-  {
-    id: 6,
-    title: "Project F",
-    category: "Private Residential",
-    image: "/images/project-f.jpg",
-  },
+const FALLBACK_PROJECTS = [
+  { id: "1", title: "Project A", category: "Hotel & Beverage, Hotels", image: "/images/project-a.jpg" },
+  { id: "2", title: "Project B", category: "Hotels", image: "/images/project-b.jpg" },
+  { id: "3", title: "Project C", category: "Hotels", image: "/images/project-c.jpg" },
+  { id: "4", title: "Project D", category: "Private Residential", image: "/images/project-d.jpg" },
+  { id: "5", title: "Project E", category: "Private Residential", image: "/images/project-e.jpg" },
+  { id: "6", title: "Project F", category: "Private Residential", image: "/images/project-f.jpg" },
 ];
 
-export const Projects = () => {
+interface ProjectsProps {
+  sanityProjects?: SanityProject[] | null;
+  settings?: SanitySettings | null;
+}
+
+export const Projects = ({ sanityProjects, settings }: ProjectsProps) => {
+  const projects =
+    sanityProjects && sanityProjects.length > 0
+      ? sanityProjects.map((p) => ({
+          id: p.slug.current,
+          title: p.title,
+          category: p.category,
+          image: resolveImageUrl(p.mainImage, 800) || "/images/project-a.jpg",
+        }))
+      : FALLBACK_PROJECTS;
+
+  const heroImage =
+    resolveImageUrl(settings?.projectsPage?.heroImage) || "/images/hero-projects.png";
+  const introHeadline =
+    settings?.projectsPage?.introHeadline ||
+    "Immersive spaces that stir senses, invite exploration, and spark emotion.";
+  const introBody =
+    settings?.projectsPage?.introBody ||
+    "Our global body of work transcends time zones, markets, and mediums, giving us the freedom to create a diverse array of spaces — from intimate pied-à-terres and superyachts to high-performance workplaces and award-winning resorts.";
+
   return (
     <div className="bg-[#FFF3EB] text-[#1a3749] min-h-screen">
 
       {/* HERO SECTION */}
       <section className="relative h-screen w-full mb-20 md:mb-32">
         <img
-          src="/images/hero-projects.png"
+          src={heroImage}
           alt="Kansept Project Hero"
           className="w-full h-full object-cover"
         />
@@ -91,10 +87,10 @@ export const Projects = () => {
           className="max-w-4xl"
         >
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-normal leading-tight mb-8">
-            Immersive spaces that stir senses, invite exploration, and spark emotion.
+            {introHeadline}
           </h2>
           <p className="text-[15px] md:text-[16px] font-normal leading-relaxed text-[#1a3749]/70 max-w-3xl">
-            Our global body of work transcends time zones, markets, and mediums, giving us the freedom to create a diverse array of spaces — from intimate pied-à-terres and superyachts to high-performance workplaces and award-winning resorts.
+            {introBody}
           </p>
         </motion.div>
       </section>

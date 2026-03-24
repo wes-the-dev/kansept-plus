@@ -3,8 +3,19 @@
 import React from "react";
 import { motion } from "motion/react";
 import { TransitionLink } from "./TransitionLink";
+import type { SanitySettings } from "@/sanity/lib/queries";
+import { resolveImageUrl } from "@/sanity/lib/imageUrl";
 
-export const Checkerboard = () => {
+interface CheckerboardProps {
+  settings?: SanitySettings | null;
+}
+
+export const Checkerboard = ({ settings }: CheckerboardProps) => {
+  const img1 = resolveImageUrl(settings?.homepage?.checkerboardImage1) ?? "/images/checkerboard-interior.png";
+  const img2 = resolveImageUrl(settings?.homepage?.checkerboardImage2) ?? "/images/checkerboard-who-we-are.png";
+  const whoWeAreText = settings?.whoWeAre?.introParagraph1 ??
+    "Kansept Plus is an established interior design studio based in Ikoyi, Lagos. We specialize in both interior design and civil construction, offering comprehensive solutions from concept to completion. Our integrated approach ensures seamless project execution, delivering spaces that are both beautifully designed and expertly built.";
+
   return (
     <section className="bg-[#FFF3EB] mt-10 md:mt-20">
       {/* Row 1: Dark Image Left | Dark Text Right */}
@@ -15,7 +26,7 @@ export const Checkerboard = () => {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            src="/images/checkerboard-interior.png"
+            src={img1}
             alt="Interior Design Project"
             className="w-full h-full object-cover max-h-[700px]"
           />
@@ -53,12 +64,7 @@ export const Checkerboard = () => {
             className="max-w-[400px]"
           >
             <h2 className="text-[11px] font-medium uppercase tracking-[3px] mb-7">Who We Are</h2>
-            <p className="text-[15px] leading-relaxed mb-9 text-[#1a3749]/65">
-              Kansept Plus is an established interior design studio based in Ikoyi, Lagos. We specialize in
-              both interior design and civil construction, offering comprehensive solutions from concept to
-              completion. Our integrated approach ensures seamless project execution, delivering spaces that
-              are both beautifully designed and expertly built.
-            </p>
+            <p className="text-[15px] leading-relaxed mb-9 text-[#1a3749]/65">{whoWeAreText}</p>
             <TransitionLink href="/who-we-are" className="text-[13px] underline decoration-[#b5754d] decoration-1 underline-offset-4 hover:text-[#b5754d] transition-colors font-medium">
               About the Studio
             </TransitionLink>
@@ -70,7 +76,7 @@ export const Checkerboard = () => {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            src="/images/checkerboard-who-we-are.png"
+            src={img2}
             alt="Interior Design Detail"
             className="w-full h-full object-cover min-h-[300px] md:min-h-[500px]"
           />

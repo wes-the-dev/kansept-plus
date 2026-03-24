@@ -5,13 +5,34 @@ import { TransitionLink } from "./TransitionLink";
 import { motion } from "motion/react";
 import { ArrowLeft, Clock, User, Share2, Facebook, Twitter, Linkedin } from "lucide-react";
 import { blogPosts } from "@/data/blogData";
+import type { SanityInsight } from "@/sanity/lib/queries";
+import { resolveImageUrl } from "@/sanity/lib/imageUrl";
+import { PortableText } from "@portabletext/react";
 
 interface BlogPostProps {
   id: string;
+  sanityPost?: SanityInsight | null;
 }
 
-export const BlogPost = ({ id }: BlogPostProps) => {
-  const post = blogPosts.find((p) => p.id === Number(id));
+export const BlogPost = ({ id, sanityPost }: BlogPostProps) => {
+  const fallbackPost = blogPosts.find((p) => p.id === Number(id));
+
+  const post = sanityPost
+    ? {
+        title: sanityPost.title,
+        category: sanityPost.category || "",
+        date: sanityPost.publishedAt
+          ? new Date(sanityPost.publishedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+          : "",
+        author: sanityPost.author || "",
+        readTime: sanityPost.readTime || "",
+        image: resolveImageUrl(sanityPost.mainImage, 1200) || "/images/blog-1.jpg",
+        portableContent: sanityPost.content || null,
+        content: null as string[] | null,
+      }
+    : fallbackPost
+    ? { ...fallbackPost, portableContent: null }
+    : null;
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -95,11 +116,15 @@ export const BlogPost = ({ id }: BlogPostProps) => {
           className="max-w-2xl mx-auto"
         >
           <div className="prose prose-lg prose-headings:font-light prose-headings:text-[#1a3749] prose-p:text-[#1a3749]/80 prose-p:font-light prose-p:leading-loose">
-            {post.content.map((paragraph, index) => (
-              <p key={index} className="mb-8 text-[18px]">
-                {paragraph}
-              </p>
-            ))}
+            {post.portableContent ? (
+              <PortableText value={post.portableContent} />
+            ) : (
+              post.content?.map((paragraph, index) => (
+                <p key={index} className="mb-8 text-[18px]">
+                  {paragraph}
+                </p>
+              ))
+            )}
           </div>
 
           {/* Share Footer */}

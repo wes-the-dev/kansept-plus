@@ -4,8 +4,14 @@ import React, { useEffect } from "react";
 import { Header } from "./Header";
 import { Projects } from "./Projects";
 import { Footer } from "./Footer";
+import type { SanityProject, SanitySettings } from "@/sanity/lib/queries";
 
-export const ProjectsPage = () => {
+interface ProjectsPageProps {
+  sanityProjects?: SanityProject[] | null;
+  settings?: SanitySettings | null;
+}
+
+export const ProjectsPage = ({ sanityProjects, settings }: ProjectsPageProps) => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -15,10 +21,10 @@ export const ProjectsPage = () => {
       <Header />
 
       <main>
-        <Projects />
+        <Projects sanityProjects={sanityProjects} settings={settings} />
       </main>
 
-      <Footer />
+      <Footer settings={settings} />
     </div>
   );
 };

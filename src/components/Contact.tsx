@@ -1,10 +1,63 @@
 "use client";
 
-import React from "react";
+import { useState } from "react";
 import { motion } from "motion/react";
 import { Instagram, Linkedin, Youtube, MapPin, Mail, Phone, Clock } from "lucide-react";
+import type { SanitySettings } from "@/sanity/lib/queries";
+import { resolveImageUrl } from "@/sanity/lib/imageUrl";
 
-export const Contact = () => {
+interface ContactProps {
+  settings?: SanitySettings | null;
+}
+
+type FormState = "idle" | "submitting" | "success" | "error";
+
+export const Contact = ({ settings }: ContactProps) => {
+  const contact = settings?.contact;
+  const global = settings?.global;
+
+  const contactImg = resolveImageUrl(contact?.contactImage1) ?? "/images/contact_img.jpg";
+  const address = contact?.address ?? "3C Olumegbon Street\nIkoyi, Lagos, Nigeria";
+  const email = contact?.email ?? "koncept09@gmail.com";
+  const phone = contact?.phone ?? "+234 123 456 7890";
+  const hours = contact?.hours ?? "Mon – Fri   9:00am – 5:00pm\nSaturday   By appointment";
+  const instagramUrl = global?.instagramUrl ?? "#";
+  const linkedinUrl = global?.linkedinUrl ?? "#";
+
+  const [formState, setFormState] = useState<FormState>("idle");
+  const [consent, setConsent] = useState(false);
+  const [fields, setFields] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    projectType: "",
+    projectLocation: "",
+    message: "",
+  });
+
+  const set = (key: keyof typeof fields) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
+    setFields((prev) => ({ ...prev, [key]: e.target.value }));
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!consent) return;
+    setFormState("submitting");
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ source: "contact", ...fields }),
+      });
+      if (!res.ok) throw new Error("Request failed");
+      setFormState("success");
+      setFields({ firstName: "", lastName: "", email: "", phone: "", projectType: "", projectLocation: "", message: "" });
+      setConsent(false);
+    } catch {
+      setFormState("error");
+    }
+  };
+
   return (
     <div className="text-[#1a3749]">
 
@@ -19,7 +72,7 @@ export const Contact = () => {
           className="w-full md:w-[55%] h-[50vh] md:h-auto relative overflow-hidden"
         >
           <img
-            src="/images/contact_img.jpg"
+            src={contactImg}
             alt="Kansept Plus Studio"
             className="w-full h-full object-cover"
           />
@@ -45,9 +98,8 @@ export const Contact = () => {
                 <MapPin size={15} className="text-[#b5754d] mt-0.5 shrink-0" />
                 <div>
                   <p className="text-[10px] uppercase tracking-[2px] text-[#FFF3EB]/40 mb-1">Address</p>
-                  <p className="text-[#FFF3EB]/80 leading-relaxed">
-                    3C Olumegbon Street<br />
-                    Ikoyi, Lagos, Nigeria
+                  <p className="text-[#FFF3EB]/80 leading-relaxed whitespace-pre-line">
+                    {address}
                   </p>
                 </div>
               </div>
@@ -56,8 +108,8 @@ export const Contact = () => {
                 <Mail size={15} className="text-[#b5754d] mt-0.5 shrink-0" />
                 <div>
                   <p className="text-[10px] uppercase tracking-[2px] text-[#FFF3EB]/40 mb-1">Email</p>
-                  <a href="mailto:koncept09@gmail.com" className="text-[#FFF3EB]/80 hover:text-[#b5754d] transition-colors">
-                    koncept09@gmail.com
+                  <a href={`mailto:${email}`} className="text-[#FFF3EB]/80 hover:text-[#b5754d] transition-colors">
+                    {email}
                   </a>
                 </div>
               </div>
@@ -66,8 +118,8 @@ export const Contact = () => {
                 <Phone size={15} className="text-[#b5754d] mt-0.5 shrink-0" />
                 <div>
                   <p className="text-[10px] uppercase tracking-[2px] text-[#FFF3EB]/40 mb-1">Phone</p>
-                  <a href="tel:+2341234567890" className="text-[#FFF3EB]/80 hover:text-[#b5754d] transition-colors">
-                    +234 123 456 7890
+                  <a href={`tel:${phone.replace(/\s/g, "")}`} className="text-[#FFF3EB]/80 hover:text-[#b5754d] transition-colors">
+                    {phone}
                   </a>
                 </div>
               </div>
@@ -76,17 +128,16 @@ export const Contact = () => {
                 <Clock size={15} className="text-[#b5754d] mt-0.5 shrink-0" />
                 <div>
                   <p className="text-[10px] uppercase tracking-[2px] text-[#FFF3EB]/40 mb-1">Studio Hours</p>
-                  <p className="text-[#FFF3EB]/80 leading-relaxed">
-                    Mon – Fri &nbsp; 9:00am – 5:00pm<br />
-                    Saturday &nbsp; By appointment
+                  <p className="text-[#FFF3EB]/80 leading-relaxed whitespace-pre-line">
+                    {hours}
                   </p>
                 </div>
               </div>
             </div>
 
             <div className="flex gap-6 mt-14">
-              <a href="#" className="text-[#FFF3EB]/40 hover:text-[#b5754d] transition-colors"><Instagram size={18} /></a>
-              <a href="#" className="text-[#FFF3EB]/40 hover:text-[#b5754d] transition-colors"><Linkedin size={18} /></a>
+              <a href={instagramUrl} className="text-[#FFF3EB]/40 hover:text-[#b5754d] transition-colors"><Instagram size={18} /></a>
+              <a href={linkedinUrl} className="text-[#FFF3EB]/40 hover:text-[#b5754d] transition-colors"><Linkedin size={18} /></a>
               <a href="#" className="text-[#FFF3EB]/40 hover:text-[#b5754d] transition-colors"><Youtube size={18} /></a>
             </div>
           </motion.div>
@@ -121,101 +172,126 @@ export const Contact = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.15 }}
           >
-            <form className="space-y-10" onSubmit={(e) => e.preventDefault()}>
+            <form className="space-y-10" onSubmit={handleSubmit}>
 
-              {/* Name row */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                {/* Name row */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                  <div className="border-b border-[#1a3749]/20 pb-3">
+                    <label className="block text-[10px] uppercase tracking-[2px] text-[#1a3749]/40 mb-2">First Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={fields.firstName}
+                      onChange={set("firstName")}
+                      className="w-full bg-transparent border-none focus:outline-none p-0 text-[15px] text-[#1a3749] placeholder:text-[#1a3749]/20 font-light"
+                      placeholder="Jane"
+                    />
+                  </div>
+                  <div className="border-b border-[#1a3749]/20 pb-3">
+                    <label className="block text-[10px] uppercase tracking-[2px] text-[#1a3749]/40 mb-2">Last Name</label>
+                    <input
+                      type="text"
+                      value={fields.lastName}
+                      onChange={set("lastName")}
+                      className="w-full bg-transparent border-none focus:outline-none p-0 text-[15px] text-[#1a3749] placeholder:text-[#1a3749]/20 font-light"
+                      placeholder="Smith"
+                    />
+                  </div>
+                </div>
+
+                {/* Contact row */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                  <div className="border-b border-[#1a3749]/20 pb-3">
+                    <label className="block text-[10px] uppercase tracking-[2px] text-[#1a3749]/40 mb-2">Email Address</label>
+                    <input
+                      type="email"
+                      required
+                      value={fields.email}
+                      onChange={set("email")}
+                      className="w-full bg-transparent border-none focus:outline-none p-0 text-[15px] text-[#1a3749] placeholder:text-[#1a3749]/20 font-light"
+                      placeholder="jane@example.com"
+                    />
+                  </div>
+                  <div className="border-b border-[#1a3749]/20 pb-3">
+                    <label className="block text-[10px] uppercase tracking-[2px] text-[#1a3749]/40 mb-2">Phone Number</label>
+                    <input
+                      type="tel"
+                      value={fields.phone}
+                      onChange={set("phone")}
+                      className="w-full bg-transparent border-none focus:outline-none p-0 text-[15px] text-[#1a3749] placeholder:text-[#1a3749]/20 font-light"
+                      placeholder="+234 000 000 0000"
+                    />
+                  </div>
+                </div>
+
+                {/* Project type */}
                 <div className="border-b border-[#1a3749]/20 pb-3">
-                  <label className="block text-[10px] uppercase tracking-[2px] text-[#1a3749]/40 mb-2">First Name</label>
+                  <label className="block text-[10px] uppercase tracking-[2px] text-[#1a3749]/40 mb-2">Project Type</label>
+                  <select
+                    value={fields.projectType}
+                    onChange={set("projectType")}
+                    className="w-full bg-transparent border-none focus:outline-none p-0 text-[15px] text-[#1a3749] font-light appearance-none"
+                  >
+                    <option value="" disabled>Select a service</option>
+                    <option>Interior Design</option>
+                    <option>Civil Construction</option>
+                    <option>Interior Design &amp; Construction</option>
+                    <option>Consultation</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+
+                {/* Location */}
+                <div className="border-b border-[#1a3749]/20 pb-3">
+                  <label className="block text-[10px] uppercase tracking-[2px] text-[#1a3749]/40 mb-2">Project Location</label>
                   <input
                     type="text"
+                    value={fields.projectLocation}
+                    onChange={set("projectLocation")}
                     className="w-full bg-transparent border-none focus:outline-none p-0 text-[15px] text-[#1a3749] placeholder:text-[#1a3749]/20 font-light"
-                    placeholder="Jane"
+                    placeholder="City, Country"
                   />
                 </div>
+
+                {/* Message */}
                 <div className="border-b border-[#1a3749]/20 pb-3">
-                  <label className="block text-[10px] uppercase tracking-[2px] text-[#1a3749]/40 mb-2">Last Name</label>
-                  <input
-                    type="text"
-                    className="w-full bg-transparent border-none focus:outline-none p-0 text-[15px] text-[#1a3749] placeholder:text-[#1a3749]/20 font-light"
-                    placeholder="Smith"
+                  <label className="block text-[10px] uppercase tracking-[2px] text-[#1a3749]/40 mb-2">Tell Us About Your Project</label>
+                  <textarea
+                    rows={4}
+                    value={fields.message}
+                    onChange={set("message")}
+                    className="w-full bg-transparent border-none focus:outline-none p-0 text-[15px] text-[#1a3749] placeholder:text-[#1a3749]/20 font-light resize-none"
+                    placeholder="Describe your vision, space, or any specific requirements…"
                   />
                 </div>
-              </div>
 
-              {/* Contact row */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                <div className="border-b border-[#1a3749]/20 pb-3">
-                  <label className="block text-[10px] uppercase tracking-[2px] text-[#1a3749]/40 mb-2">Email Address</label>
-                  <input
-                    type="email"
-                    className="w-full bg-transparent border-none focus:outline-none p-0 text-[15px] text-[#1a3749] placeholder:text-[#1a3749]/20 font-light"
-                    placeholder="jane@example.com"
-                  />
+                {/* Consent + Submit */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pt-2">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={consent}
+                      onChange={(e) => setConsent(e.target.checked)}
+                      className="w-4 h-4 rounded-none border border-[#1a3749]/30 text-[#b5754d] focus:ring-0 accent-[#b5754d]"
+                    />
+                    <span className="text-[11px] font-light text-[#1a3749]/50 leading-relaxed">
+                      I agree to the processing of my personal data.
+                    </span>
+                  </label>
+
+                  <button
+                    type="submit"
+                    disabled={!consent || formState === "submitting" || formState === "success"}
+                    className="shrink-0 px-10 py-4 bg-[#1a3749] text-[#FFF3EB] text-[11px] uppercase tracking-[3px] font-medium hover:bg-[#b5754d] transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {formState === "submitting" ? "Sending…" : formState === "success" ? "Submitted" : "Send Enquiry"}
+                  </button>
                 </div>
-                <div className="border-b border-[#1a3749]/20 pb-3">
-                  <label className="block text-[10px] uppercase tracking-[2px] text-[#1a3749]/40 mb-2">Phone Number</label>
-                  <input
-                    type="tel"
-                    className="w-full bg-transparent border-none focus:outline-none p-0 text-[15px] text-[#1a3749] placeholder:text-[#1a3749]/20 font-light"
-                    placeholder="+234 000 000 0000"
-                  />
-                </div>
-              </div>
 
-              {/* Project type */}
-              <div className="border-b border-[#1a3749]/20 pb-3">
-                <label className="block text-[10px] uppercase tracking-[2px] text-[#1a3749]/40 mb-2">Project Type</label>
-                <select className="w-full bg-transparent border-none focus:outline-none p-0 text-[15px] text-[#1a3749] font-light appearance-none">
-                  <option value="" disabled selected>Select a service</option>
-                  <option>Interior Design</option>
-                  <option>Civil Construction</option>
-                  <option>Interior Design &amp; Construction</option>
-                  <option>Consultation</option>
-                  <option>Other</option>
-                </select>
-              </div>
-
-              {/* Location */}
-              <div className="border-b border-[#1a3749]/20 pb-3">
-                <label className="block text-[10px] uppercase tracking-[2px] text-[#1a3749]/40 mb-2">Project Location</label>
-                <input
-                  type="text"
-                  className="w-full bg-transparent border-none focus:outline-none p-0 text-[15px] text-[#1a3749] placeholder:text-[#1a3749]/20 font-light"
-                  placeholder="City, Country"
-                />
-              </div>
-
-              {/* Message */}
-              <div className="border-b border-[#1a3749]/20 pb-3">
-                <label className="block text-[10px] uppercase tracking-[2px] text-[#1a3749]/40 mb-2">Tell Us About Your Project</label>
-                <textarea
-                  rows={4}
-                  className="w-full bg-transparent border-none focus:outline-none p-0 text-[15px] text-[#1a3749] placeholder:text-[#1a3749]/20 font-light resize-none"
-                  placeholder="Describe your vision, space, or any specific requirements…"
-                />
-              </div>
-
-              {/* Consent + Submit */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pt-2">
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4 rounded-none border border-[#1a3749]/30 text-[#b5754d] focus:ring-0 accent-[#b5754d]"
-                  />
-                  <span className="text-[11px] font-light text-[#1a3749]/50 leading-relaxed">
-                    I agree to the processing of my personal data.
-                  </span>
-                </label>
-
-                <button
-                  type="submit"
-                  className="shrink-0 px-10 py-4 bg-[#1a3749] text-[#FFF3EB] text-[11px] uppercase tracking-[3px] font-medium hover:bg-[#b5754d] transition-colors duration-300"
-                >
-                  Send Enquiry
-                </button>
-              </div>
-            </form>
+                {formState === "error" && (
+                  <p className="text-[12px] text-red-600 font-light">Something went wrong. Please try again or email us directly.</p>
+                )}
+              </form>
           </motion.div>
 
         </div>

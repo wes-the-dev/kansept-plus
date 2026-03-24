@@ -2,8 +2,18 @@
 
 import React from "react";
 import { motion } from "motion/react";
+import type { SanitySettings } from "@/sanity/lib/queries";
+import { resolveImageUrl } from "@/sanity/lib/imageUrl";
 
-export const ImageQuote = () => {
+interface ImageQuoteProps {
+  settings?: SanitySettings | null;
+}
+
+export const ImageQuote = ({ settings }: ImageQuoteProps) => {
+  const img = resolveImageUrl(settings?.homepage?.imageQuoteImage) ?? "/images/image-quote.png";
+  const quote = settings?.homepage?.imageQuote ??
+    "We don’t just design spaces, we build dreams. Every project is a journey from imagination to reality, where design meets craftsmanship.";
+
   return (
     <section className="bg-[#FFF3EB] px-6 md:px-[60px] py-4 md:pb-20 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-4">
       <motion.div
@@ -14,7 +24,7 @@ export const ImageQuote = () => {
         className="w-full h-[400px] md:h-auto"
       >
         <img
-          src="/images/image-quote.png"
+          src={img}
           alt="Interior Design Project Detail"
           className="w-full h-full object-cover block"
         />
@@ -38,8 +48,7 @@ export const ImageQuote = () => {
           className="max-w-[460px]"
         >
           <p className="text-[17px] md:text-[20px] font-light italic leading-relaxed mb-7 text-[#1a3749]">
-            We don&apos;t just design spaces, we build dreams. Every project is a journey from imagination to reality,
-            where design meets craftsmanship.
+            {quote}
           </p>
           <cite className="block text-[11px] font-medium not-italic uppercase tracking-[2.5px] text-[#1a3749]/65">
             Kansept Plus Philosophy
