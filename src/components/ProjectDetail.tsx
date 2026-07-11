@@ -75,12 +75,12 @@ export const ProjectDetail = ({ id, sanityProject }: ProjectDetailProps) => {
   const gallery =
     sanityProject?.gallery && sanityProject.gallery.length > 0
       ? sanityProject.gallery.map((section) => ({
-          type: section.layout,
-          items: section.images.map((m) => {
-            const resolved = resolveMediaAsset(m);
-            return { url: resolved?.url ?? "", isVideo: resolved?.isVideo ?? false };
-          }),
-        }))
+        type: section.layout,
+        items: section.images.map((m) => {
+          const resolved = resolveMediaAsset(m);
+          return { url: resolved?.url ?? "", isVideo: resolved?.isVideo ?? false };
+        }),
+      }))
       : FALLBACK_GALLERY;
 
   return (
@@ -207,7 +207,7 @@ export const ProjectDetail = ({ id, sanityProject }: ProjectDetailProps) => {
       </section>
 
       {/* NEXT PROJECT NAVIGATION */}
-      <section className="px-6 md:px-[60px] pb-20 pt-10 border-t border-[#1a3749]/10 mx-6 md:mx-[60px]">
+      {/* <section className="px-6 md:px-[60px] pb-20 pt-10 border-t border-[#1a3749]/10 mx-6 md:mx-[60px]">
         <div className="flex justify-between items-center">
           <TransitionLink href="/projects" className="text-[11px] uppercase tracking-[2px] text-[#1a3749]/50 hover:text-[#1a3749] transition-colors">
             All Projects
@@ -216,7 +216,7 @@ export const ProjectDetail = ({ id, sanityProject }: ProjectDetailProps) => {
             Next Project <ArrowRight size={16} />
           </TransitionLink>
         </div>
-      </section>
+      </section> */}
 
     </div>
   );
