@@ -26,7 +26,7 @@ interface GalleryProps {
 }
 
 export const Gallery = ({ sanityImages }: GalleryProps) => {
-  const images =
+  const resolvedImages =
     sanityImages && sanityImages.length > 0
       ? sanityImages.map((g) => ({
           src:
@@ -37,6 +37,8 @@ export const Gallery = ({ sanityImages }: GalleryProps) => {
           isVideo: g.mediaType === "video",
         }))
       : FALLBACK_IMAGES;
+  
+  const images = resolvedImages.slice(0, 3);
   type MediaItem = { src: string; alt: string; isVideo: boolean };
   const [activeIndex, setActiveIndex] = useState(0);
   const [itemWidth, setItemWidth] = useState(420);

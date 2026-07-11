@@ -43,7 +43,7 @@ export const Footer = ({ settings }: FooterProps) => {
           <address className="not-italic text-[13px] font-light leading-[1.8] opacity-80">
             <p>3C Olumegbon Street</p>
             <p className="mb-2">Ikoyi, Lagos, Nigeria 2341</p>
-            <a href="mailto:koncept09@gmail.com" className="hover:text-[#b5754d] transition-colors">koncept09@gmail.com</a>
+            <a href="mailto:enquire@kanseptplus.com" className="hover:text-[#b5754d] transition-colors">enquire@kanseptplus.com</a>
           </address>
         </div>
 

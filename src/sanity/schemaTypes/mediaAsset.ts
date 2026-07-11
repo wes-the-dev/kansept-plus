@@ -35,9 +35,9 @@ export const mediaAsset = defineType({
       title: "Video File",
       type: "file",
       options: {
-        accept: "video/mp4,video/webm,video/quicktime,video/ogg",
+        accept: "video/mp4,video/webm,video/ogg",
       },
-      description: "Upload a video (MP4, WebM, or MOV). Only used when Media Type is set to Video.",
+      description: "Upload a video (MP4, WebM, or Ogg). Only used when Media Type is set to Video. Recommended format is MP4 for universal compatibility.",
     },
   ],
   preview: {
