@@ -24,15 +24,15 @@ export const Projects = ({ sanityProjects, settings }: ProjectsProps) => {
   const projects =
     sanityProjects && sanityProjects.length > 0
       ? sanityProjects.map((p) => {
-          const media = resolveMediaAsset(p.mainImage, 800);
-          return {
-            id: p.slug.current,
-            title: p.title,
-            category: p.category,
-            url: media?.url ?? "/images/project-a.jpg",
-            isVideo: media?.isVideo ?? false,
-          };
-        })
+        const media = resolveMediaAsset(p.mainImage, 800);
+        return {
+          id: p.slug.current,
+          title: p.title,
+          category: p.category,
+          url: media?.url ?? "/images/project-a.jpg",
+          isVideo: media?.isVideo ?? false,
+        };
+      })
       : FALLBACK_PROJECTS.map((p) => ({ ...p, url: p.image, isVideo: false }));
 
   const heroMedia = resolveMediaAsset(settings?.projectsPage?.heroImage);
@@ -136,11 +136,11 @@ export const Projects = ({ sanityProjects, settings }: ProjectsProps) => {
           ))}
         </div>
 
-        <div className="flex justify-center mt-24">
+        {/* <div className="flex justify-center mt-24">
           <button className="text-[10px] uppercase tracking-[3px] text-[#b5754d] hover:text-[#1a3749] transition-colors border-b border-[#b5754d] pb-1 hover:border-[#1a3749]">
             Load More
           </button>
-        </div>
+        </div> */}
       </section>
 
     </div>
