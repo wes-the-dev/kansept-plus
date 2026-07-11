@@ -29,16 +29,16 @@ export const Gallery = ({ sanityImages }: GalleryProps) => {
   const resolvedImages =
     sanityImages && sanityImages.length > 0
       ? sanityImages.map((g) => ({
-          src:
-            g.mediaType === "video"
-              ? g.video?.asset?.url || ""
-              : g.image?.asset?.url || "/images/staircase.jpg",
-          alt: g.alt || "Gallery image",
-          isVideo: g.mediaType === "video",
-        }))
+        src:
+          g.mediaType === "video"
+            ? g.video?.asset?.url || ""
+            : g.image?.asset?.url || "/images/staircase.jpg",
+        alt: g.alt || "Gallery image",
+        isVideo: g.mediaType === "video",
+      }))
       : FALLBACK_IMAGES;
-  
-  const images = resolvedImages.slice(0, 3);
+
+  const images = resolvedImages.slice(0, 4);
   type MediaItem = { src: string; alt: string; isVideo: boolean };
   const [activeIndex, setActiveIndex] = useState(0);
   const [itemWidth, setItemWidth] = useState(420);
